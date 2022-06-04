@@ -113,6 +113,8 @@ class g2pk4utau(object):
 def main():
     converter = g2pk4utau()
 
-    while True:
-        text = input("변환할 문장을 입력하세요: ")
-        converter(text, verbose=VerboseMode.ALL)
+    try:
+        while True:
+            converter(input("변환할 문장을 입력하세요: "), verbose=VerboseMode.ALL)
+    except KeyboardInterrupt:
+        print("\nDone.")
