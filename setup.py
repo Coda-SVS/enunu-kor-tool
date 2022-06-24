@@ -1,5 +1,5 @@
-from glob import glob
-from posixpath import basename, splitext
+# from glob import glob
+# from posixpath import basename, splitext
 import setuptools
 
 g2p4utau_required_packages = [
@@ -8,11 +8,21 @@ g2p4utau_required_packages = [
     "g2pk==0.9.3",
 ]
 
-total_required_packages = g2p4utau_required_packages
+utaupyk_required_packages = [
+    "utaupy==1.18.0",
+    "tqdm",
+    "pyyaml==6.0",
+]
+
+total_required_packages = []
+total_required_packages += g2p4utau_required_packages
+total_required_packages += utaupyk_required_packages
+
+total_required_packages = list(set(total_required_packages))
 
 setuptools.setup(
     name="enunu-kor-tool",
-    version="0.0.4",
+    version="0.0.5",
     author="cardroid",
     author_email="carbonsindh@gmail.com",
     description="enunu Korean language support script collection",
