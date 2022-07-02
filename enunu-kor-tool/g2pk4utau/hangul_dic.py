@@ -67,19 +67,19 @@ def get_phn_dictionary(labeling_mode: bool = True):
     ##### 전처리 #####
     pre_regex_list = [
         # 종성 'ㄹ'과 초성 'ㄹ'이 만날 경우 둘 다 'l'로 발음
-        (r"ㄹ(\s*)ㄹ", r"l\1 l "),
+        (r"ㄹ(\s*)ㄹ", r"L\1 l "),
         # 모음 뒤, 'ㅎ' 앞의 'ㄹ'
-        (r"ㄹ(\s*)ㅎ", r"r\1 h "),
+        (r"ㄹ(\s*)ㅎ", r"RR\1 h "),
         # 모음과 모음 사이 'ㄹ'
         (r"(?<=[ㅏ-ㅣ]\s*)ㄹ(?=\s*[ㅏ-ㅣ])", r"r "),
     ]
 
     if labeling_mode:
-        pre_regex_list.append((r"(?<=ㄱ)(\s*)ㅆ", r"k\1ss "))
-        pre_regex_list.append((r"(?<=ㅂ)(\s*)ㅆ", r"p\1ss "))
+        pre_regex_list.append((r"(?<=ㄱ)(\s*)ㅆ", r"K\1ss "))
+        pre_regex_list.append((r"(?<=ㅂ)(\s*)ㅆ", r"P\1ss "))
     else:
-        pre_regex_list.append((r"(?<=ㄱ\s*)ㅆ", r"kss "))
-        pre_regex_list.append((r"(?<=ㅂ\s*)ㅆ", r"pss "))
+        pre_regex_list.append((r"(?<=ㄱ\s*)ㅆ", r"Kss "))
+        pre_regex_list.append((r"(?<=ㅂ\s*)ㅆ", r"Pss "))
 
     ########
     # 초성 #
@@ -178,19 +178,12 @@ def get_phn_dictionary(labeling_mode: bool = True):
         (r"ㄷ", r"T "),
         # 압, 앞 ... 등에 쓰이는 받침
         (r"ㅂ", r"P "),
-        # 유성 받침은 초성과 발음이 유사
         # # 안 ... 등에 쓰이는 받침
-        # (r"ㄴ", r"N "),
+        (r"ㄴ", r"N "),
         # # 알 ... 등에 쓰이는 받침
-        # (r"ㄹ", r"L "),
+        (r"ㄹ", r"L "),
         # # 암 ... 등에 쓰이는 받침
-        # (r"ㅁ", r"M "),
-        # 안 ... 등에 쓰이는 받침
-        (r"ㄴ", r"n "),
-        # 알 ... 등에 쓰이는 받침
-        (r"ㄹ", r"l "),
-        # 암 ... 등에 쓰이는 받침
-        (r"ㅁ", r"m "),
+        (r"ㅁ", r"M "),
         # 앙 ... 등에 쓰이는 받침 (유성 받침, 초성에서 발음이 없음)
         (r"ㅇ", r"NG "),
     ]
