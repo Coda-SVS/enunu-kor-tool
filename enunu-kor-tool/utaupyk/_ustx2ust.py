@@ -8,9 +8,9 @@ from tqdm import tqdm
 
 
 class Ustx2Ust_Converter:
-    def __init__(self, path) -> None:
+    def __init__(self, path, encoding="cp932") -> None:
         try:
-            with open(path, mode="r", encoding="cp932") as f:
+            with open(path, mode="r", encoding=encoding) as f:
                 self.ustx = yaml.load(f, Loader=yaml.FullLoader)
         except UnicodeDecodeError:
             try:
