@@ -5,8 +5,8 @@ from typing import List, Union
 import utaupy
 from tqdm import tqdm
 
-import g2pk4utau
-from utaupyk._ustx2ust import Ustx2Ust_Converter
+from enunu_kor_tool import g2pk4utau
+from enunu_kor_tool.utaupyk._ustx2ust import Ustx2Ust_Converter
 
 USE_G2PK4UTAU = True
 USE_TIMELINE = True
@@ -31,7 +31,7 @@ def convert(input_filepath: str, d_table: dict, g2p_converter: Union[g2pk4utau.g
         note = ust.notes[idx]
         phn_tqdm.set_description(f"Lyric = {note.lyric}")
 
-        if g2p_converter != None and g2pk4utau.isHangul(note.lyric):
+        if g2p_converter != None and g2pk4utau.isCanConvert(note.lyric):
             prev_note = ust.notes[idx - 1] if idx != 0 else ""
             next_note = ust.notes[idx + 1] if idx + 1 < notes_len else ""
 
@@ -42,15 +42,26 @@ def convert(input_filepath: str, d_table: dict, g2p_converter: Union[g2pk4utau.g
             orginal_lyrics = []
             for idx in range(3):
                 if isinstance(note_block[idx], utaupy.ust.Note):
-                    if g2pk4utau.isHangul(note_block[idx].lyric):
+                    if g2pk4utau.isCanConvert(note_block[idx].lyric):
                         orginal_lyrics.append(note_block[idx].lyric)
                     elif idx == 0:
                         current_phn_idx = 0
 
-            kor_phn_result = g2p_converter("".join(orginal_lyrics))
-            kor_phn_token = kor_phn_result[2]
+            kor_phn_result = g2p_converter(g2pk4utau.clear_Special_Character("".join(orginal_lyrics)))
+            kor_phn_tokens = kor_phn_result[2]
 
-            phns: List[str] = kor_phn_token[current_phn_idx].split(" ")
+            if not g2pk4utau.isHangul(note.lyric):
+                temp_phn_tokens = []
+                for ly in note.lyric:
+                    if g2pk4utau.isHangul(ly):
+                        temp_phn_tokens.append(kor_phn_tokens[current_phn_idx])
+                    else:
+                        temp_phn_tokens.extend(d_table.get(ly, ly))
+                kor_phn_token = " ".join(temp_phn_tokens)
+            else:
+                kor_phn_token: str = kor_phn_tokens[current_phn_idx]
+
+            phns: List[str] = kor_phn_token.split(" ")
 
             phn_time_length = length100ns_converter(note) / len(phns)
 

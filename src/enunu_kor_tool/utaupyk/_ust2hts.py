@@ -24,6 +24,8 @@ d3, e3, f3 には 'xx' を代入する。歌うときに休符の学習データ
 from typing import Tuple
 import utaupy as up
 
+from tqdm import tqdm
+
 from enunu_kor_tool import g2pk4utau
 
 
@@ -50,17 +52,22 @@ def ustnote2htsnote(ust_note_block: Tuple[up.ust.Note, up.ust.Note, up.ust.Note]
 
     phonemes = []
     if g2pk4utau.isHangul(ust_note_block[1].lyric):
+        assert len(ust_note_block) == 3
+
+        current_phn_idx = 1
+
         orginal_lyrics = []
-        ust_note_block_len = len(ust_note_block)
-        for idx in range(ust_note_block_len):
+        for idx in range(3):
             if isinstance(ust_note_block[idx], up.ust.Note):
-                if idx != 2 or g2pk4utau.isHangul(ust_note_block[idx].lyric):
+                if g2pk4utau.isHangul(ust_note_block[idx].lyric):
                     orginal_lyrics.append(ust_note_block[idx].lyric)
+                elif idx == 0:
+                    current_phn_idx = 0
 
         kor_phn_result = g2p_converter("".join(orginal_lyrics))
         kor_phn_token = kor_phn_result[2]
 
-        phonemes += kor_phn_token[1].split(" ")
+        phonemes += kor_phn_token[current_phn_idx].split(" ")
     else:
         orginal_lyrics = ust_note_block[1].lyric.split()
 
@@ -100,16 +107,13 @@ def ustobj2songobj(ust: up.ust.Ust, d_table: dict, g2p_converter=None, key_of_th
         g2p_converter = g2pk4utau.g2pk4utau()
 
     song = up.hts.Song()
-    ust_notes = ust.notes
     # Noteオブジェクトの種類を変換
-    notes_len = len(ust_notes)
-    for idx in range(notes_len):
-        if idx == 0:
-            note_block = ("", ust_notes[idx], ust_notes[idx + 1])
-        elif idx == notes_len - 1:
-            note_block = (ust_notes[idx - 1], ust_notes[idx], "")
-        else:
-            note_block = (ust_notes[idx - 1], ust_notes[idx], ust_notes[idx + 1])
+    notes_len = len(ust.notes)
+    for idx in tqdm(range(notes_len), leave=False):
+        prev_note = ust.notes[idx - 1] if idx != 0 else ""
+        next_note = ust.notes[idx + 1] if idx + 1 < notes_len else ""
+
+        note_block = (prev_note, ust.notes[idx], next_note)
 
         hts_note = ustnote2htsnote(note_block, d_table, g2p_converter, key_of_the_note=key_of_the_note)
         song.append(hts_note)

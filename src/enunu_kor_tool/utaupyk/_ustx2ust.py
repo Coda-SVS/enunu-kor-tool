@@ -81,21 +81,21 @@ def ustx2ust(db_root, out_dir):
             converter.save_ust(os.path.join(out_dir, f"{name}.ust"))
 
 
-# from sys import argv
-
-# def main(path_config_yaml):
-#     import shutil
-
-#     with open(path_config_yaml, "r") as fy:
-#         config = yaml.load(fy, Loader=yaml.FullLoader)
-#     db_root = os.path.expanduser(config["stage0"]["db_root"]).strip('"')
-#     out_dir = os.path.join(db_root, "ust_auto_exp")
-
-#     if os.path.isdir(out_dir):
-#         shutil.rmtree(out_dir)
-
-#     ustx2ust(db_root, out_dir)
+import shutil
+from sys import argv
 
 
-# if __name__ == "__main__":
-#     main(argv[1].strip('"'))
+def ustx2ust_main(path_config_yaml):
+    with open(path_config_yaml, "r") as fy:
+        config = yaml.load(fy, Loader=yaml.FullLoader)
+    db_root = os.path.expanduser(config["stage0"]["db_root"]).strip('"')
+    out_dir = os.path.join(db_root, "ust_auto_exp")
+
+    if os.path.isdir(out_dir):
+        shutil.rmtree(out_dir)
+
+    ustx2ust(db_root, out_dir)
+
+
+if __name__ == "__main__":
+    ustx2ust_main(argv[1].strip('"'))

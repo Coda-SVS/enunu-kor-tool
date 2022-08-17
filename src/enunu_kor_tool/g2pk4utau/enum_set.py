@@ -6,11 +6,12 @@ class VerboseMode(Flag):
     NONE = auto()
     PARAMETER = auto()
     INPUT = auto()
+    PREPHN = auto()
     G2PK = auto()
     G2P4UTAU = auto()
     OUTPUT = auto()
     INPUT_OUTPUT = INPUT | OUTPUT
-    PROGRESS = G2PK | G2P4UTAU
+    PROGRESS = PREPHN | G2PK | G2P4UTAU
     ALL = PARAMETER | INPUT_OUTPUT | PROGRESS
 
     def is_flag(self, item) -> bool:

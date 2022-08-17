@@ -12,6 +12,7 @@ utaupyk_required_packages = [
     "utaupy==1.18.0",
     "tqdm",
     "pyyaml==6.0",
+    "natsort",
 ]
 
 ustx2lab_required_packages = [
@@ -27,21 +28,21 @@ total_required_packages += ustx2lab_required_packages
 total_required_packages = list(set(total_required_packages))
 
 setuptools.setup(
-    name="enunu-kor-tool",
+    name="enunu_kor_tool",
     version="0.0.7",
     author="cardroid",
     author_email="carbonsindh@gmail.com",
     description="enunu Korean language support script collection",
     install_requires=total_required_packages,
     license="MIT",
-    packages=setuptools.find_packages(where="enunu-kor-tool"),
-    package_dir={"": "enunu-kor-tool"},
+    packages=setuptools.find_packages(where="src"),
+    package_dir={"": "src"},
     python_requires=">=3.8",
     include_package_data=True,
     entry_points={
         "console_scripts": [
-            "g2pk4utau=g2pk4utau.g2pk4utau:main",
-            "ustx2lab=ustx2lab:main",
+            "g2pk4utau=enunu_kor_tool.g2pk4utau.g2pk4utau:main",
+            "ustx2lab=enunu_kor_tool.ustx2lab:main",
         ]
     },
 )

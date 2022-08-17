@@ -1,17 +1,101 @@
 # 해당 자소 및 음소는 공식적인 문법이 아닐 수 있습니다. (보기에 더 좋게 설계됨)
 # These consonants and phonemes may not be official grammar. (Designed to look better)
 
+from typing import List, Tuple
 import regex
 
 
 ## For Verbose
-from .enum_set import VerboseMode
+from enunu_kor_tool.g2pk4utau.enum_set import VerboseMode
 
 differ = None
 
 
 Consonants_LIST = ["ㄱ", "ㄴ", "ㄷ", "ㄹ", "ㅁ", "ㅂ", "ㅅ", "ㅇ", "ㅈ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ", "ㄲ", "ㄸ", "ㅃ", "ㅆ", "ㅉ"]
 Vowels_LIST = ["ㅏ", "ㅑ", "ㅓ", "ㅕ", "ㅗ", "ㅛ", "ㅜ", "ㅠ", "ㅡ", "ㅣ", "ㅐ", "ㅒ", "ㅔ", "ㅖ", "ㅘ", "ㅙ", "ㅚ", "ㅝ", "ㅞ", "ㅟ", "ㅢ"]
+
+Special_Character_Filter = [
+    " ",
+    "\-",
+    "=",
+    "+",
+    ",",
+    "#",
+    "/",
+    "\?",
+    ":",
+    "^",
+    "$",
+    ".",
+    "@",
+    "*",
+    '"',
+    "※",
+    "~",
+    "&",
+    "%",
+    "ㆍ",
+    "!",
+    "』",
+    "\\",
+    "‘",
+    "|",
+    "\(",
+    "\)",
+    "\[",
+    "\]",
+    "\<",
+    "\>",
+    "`",
+    "'",
+    "…",
+    "》",
+]
+
+
+def __get_norm_Special_Character_Filter():
+    global Special_Character_Filter
+    return [c[-1] if len(c) > 1 else c for c in Special_Character_Filter]
+
+
+Special_Character_Filter_norm = __get_norm_Special_Character_Filter()
+
+
+def clear_Special_Character(text: str) -> str:
+    return regex.sub("[" + "".join(Special_Character_Filter) + "]", "", text)
+
+
+def replace2pre_phn(origin_text: str, verbose: VerboseMode = VerboseMode.NONE) -> Tuple[str, List[Tuple[int, int, str]]]:
+    verbose__ = verbose.is_flag(verbose.PREPHN)
+
+    pre_phns = []
+    result_str = []
+
+    fter = "[" + "".join(Special_Character_Filter) + "]"
+
+    word_idx = 0
+    for char in origin_text:
+        if regex.match(fter, char) != None:
+            pre_phns.append((len(result_str), word_idx, char))  # 현재 위치, 단어 단위 위치, 문자
+        else:
+            if char == " ":
+                word_idx += 1
+            result_str.append(char)
+
+    if verbose__:
+        temp_dict = {}
+        for idx, word_idx, phn in pre_phns:
+            if (phn_space := temp_dict.get(phn)) == None:
+                phn_space = []
+                temp_dict[phn] = phn_space
+            phn_space.append(idx)
+
+        for key, list in temp_dict.items():
+            print(f"[\033[1;32m{key}\033[0m] ({len(list)}) : {list}")
+
+        print(f"\033[1;33mLIST\033[0m: {pre_phns}")
+
+    return "".join(result_str), pre_phns
 
 
 def replace2phn(dic: dict, jamo_text: str, verbose: VerboseMode = VerboseMode.NONE):
