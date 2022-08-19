@@ -51,7 +51,7 @@ def ustnote2htsnote(ust_note_block: Tuple[up.ust.Note, up.ust.Note, up.ust.Note]
     hts_syllable = up.hts.Syllable()
 
     phonemes = []
-    if g2pk4utau.isHangul(ust_note_block[1].lyric):
+    if g2pk4utau.isCanConvert(ust_note_block[1].lyric):
         assert len(ust_note_block) == 3
 
         current_phn_idx = 1
@@ -59,15 +59,26 @@ def ustnote2htsnote(ust_note_block: Tuple[up.ust.Note, up.ust.Note, up.ust.Note]
         orginal_lyrics = []
         for idx in range(3):
             if isinstance(ust_note_block[idx], up.ust.Note):
-                if g2pk4utau.isHangul(ust_note_block[idx].lyric):
+                if g2pk4utau.isCanConvert(ust_note_block[idx].lyric):
                     orginal_lyrics.append(ust_note_block[idx].lyric)
                 elif idx == 0:
                     current_phn_idx = 0
 
-        kor_phn_result = g2p_converter("".join(orginal_lyrics))
-        kor_phn_token = kor_phn_result[2]
+        kor_phn_result = g2p_converter(g2pk4utau.clear_Special_Character("".join(orginal_lyrics)))
+        kor_phn_tokens = kor_phn_result[2]
 
-        phonemes += kor_phn_token[current_phn_idx].split(" ")
+        if not g2pk4utau.isHangul(ust_note_block[1].lyric):
+            temp_phn_tokens = []
+            for ly in ust_note_block[1].lyric:
+                if g2pk4utau.isHangul(ly):
+                    temp_phn_tokens.append(kor_phn_tokens[current_phn_idx])
+                else:
+                    temp_phn_tokens.extend(d_table.get(ly, ly))
+            kor_phn_token = " ".join(temp_phn_tokens)
+        else:
+            kor_phn_token: str = kor_phn_tokens[current_phn_idx]
+
+        phonemes += kor_phn_token.split(" ")
     else:
         orginal_lyrics = ust_note_block[1].lyric.split()
 
