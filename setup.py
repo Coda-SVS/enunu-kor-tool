@@ -11,7 +11,7 @@ g2p4utau_required_packages = [
 utaupyk_required_packages = [
     "utaupy==1.18.0",
     "tqdm",
-    "pyyaml==6.0",
+    "pyyaml==5.4.1",
     "natsort",
 ]
 
