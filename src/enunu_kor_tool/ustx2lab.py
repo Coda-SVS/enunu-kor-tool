@@ -18,18 +18,31 @@ def convert(input_filepath: str, d_table: dict, g2p_converter: Union[g2pk4utau.g
     assert os.path.isfile(input_filepath)
 
     ust = utaupy.ust.load(input_filepath, encoding="utf-8")
+    filename = os.path.splitext(os.path.basename(input_filepath))[0]
 
     length100ns_converter = lambda nt: round(float(25000000 * (int(nt.length) / 20) / int(nt.tempo)))
 
     # 한 소절 시간 계산 (sil 음소 자동 추가 시도)
     # song_bar_calculator = lambda bpm, beat_numerator, beat_denominator: round(60 / ust * beat_numerator * 4 / beat_denominator * 1000 * 1000 * 10)
 
+    range_idx = 10
     global_length = 0
 
     phonemes = []
     for idx in (phn_tqdm := tqdm(range(notes_len := len(ust.notes)), leave=False)):
         note = ust.notes[idx]
-        phn_tqdm.set_description(f"Lyric = {note.lyric}")
+
+        s_idx = idx - range_idx
+        e_idx = idx + range_idx
+        if s_idx < 0:
+            s_idx = 0
+        if e_idx >= notes_len:
+            e_idx = notes_len - 1
+
+        phn_tqdm.set_description(f"Lyric = " + "".join([note.lyric for note in ust.notes[s_idx:e_idx]]))
+
+        if note.lyric != note.lyric.strip():
+            tqdm.write(f'Warning: "{note.lyric}" 불필요한 문자가 포함됨. from [{filename}]')
 
         if g2p_converter != None and g2pk4utau.isCanConvert(note.lyric):
             prev_note = ust.notes[idx - 1] if idx != 0 else ""
@@ -152,7 +165,8 @@ def main():
             templist.append(file_fullname)
     input_files = templist
 
-    for input_filepath in tqdm(input_files, desc="Processing..."):
+    for input_filepath in (input_filepath_tqdm := tqdm(input_files)):
+        input_filepath_tqdm.set_description(f"Processing... [{os.path.basename(input_filepath)}]")
         ustx2lab(table_filepath=args["table"], input_filepath=input_filepath, output_dirpath=args["output"])
 
     print("done.")
