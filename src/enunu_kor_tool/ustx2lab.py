@@ -74,7 +74,7 @@ def convert(input_filepath: str, d_table: dict, g2p_converter: Union[g2pk4utau.g
             phn_time_length = length100ns_converter(note) / len(orginal_lyrics)
 
             for lyric in orginal_lyrics:
-                phonemes.append((round(global_length), *d_table.get(lyric, lyric)))
+                phonemes.append((round(global_length), *d_table.get(lyric, [lyric])))
                 global_length += phn_time_length
 
     result = []
