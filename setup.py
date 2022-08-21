@@ -29,7 +29,7 @@ total_required_packages = list(set(total_required_packages))
 
 setuptools.setup(
     name="enunu_kor_tool",
-    version="0.0.8",
+    version="0.0.9",
     author="cardroid",
     author_email="carbonsindh@gmail.com",
     description="enunu Korean language support script collection",
@@ -43,6 +43,7 @@ setuptools.setup(
         "console_scripts": [
             "g2pk4utau=enunu_kor_tool.g2pk4utau.g2pk4utau:main",
             "ustx2lab=enunu_kor_tool.ustx2lab:main",
+            "lab2ntlab=enunu_kor_tool.lab2ntlab:main",
         ]
     },
 )
