@@ -1,24 +1,48 @@
 # Copyright (c) 2022 cardroid
 
+import os, re
 from glob import glob
-import os
 
 import yaml
 from tqdm import tqdm
+from yaml import loader
+
+
+class FullLoader(loader.Reader, loader.Scanner, loader.Parser, loader.Composer, loader.FullConstructor, loader.Resolver):
+    def __init__(self, stream):
+
+        loader.Reader.__init__(self, stream)
+        loader.Scanner.__init__(self)
+        loader.Parser.__init__(self)
+        loader.Composer.__init__(self)
+        loader.FullConstructor.__init__(self)
+        loader.Resolver.__init__(self)
+
+        for key, reg in loader.Resolver.yaml_implicit_resolvers.items():
+            reg_n = []
+            for in_reg in reg:
+                in_reg = list(in_reg)
+                if in_reg[0] == "tag:yaml.org,2002:bool":
+                    in_reg[1] = re.compile(
+                        r"""^(?:YES|NO|TRUE|FALSE|ON|OFF)$""",
+                        re.X,
+                    )
+                reg_n.append(tuple(in_reg))
+            loader.Resolver.yaml_implicit_resolvers[key] = reg_n
 
 
 class Ustx2Ust_Converter:
     def __init__(self, path, encoding="cp932") -> None:
         try:
             with open(path, mode="r", encoding=encoding) as f:
-                self.ustx = yaml.load(f, Loader=yaml.FullLoader)
+                self.ustx = yaml.load(f, Loader=FullLoader)
         except UnicodeDecodeError:
             try:
                 with open(path, mode="r", encoding="utf-8") as f:
-                    self.ustx = yaml.load(f, Loader=yaml.FullLoader)
+                    self.ustx = yaml.load(f, Loader=FullLoader)
             except UnicodeDecodeError:
                 with open(path, mode="r", encoding="utf-8_sig") as f:
-                    self.ustx = yaml.load(f, Loader=yaml.FullLoader)
+                    self.ustx = yaml.load(f, Loader=FullLoader)
 
     def save_ust(self, path: str):
         project = self.ustx
