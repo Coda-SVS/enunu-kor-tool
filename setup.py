@@ -29,7 +29,7 @@ total_required_packages = list(set(total_required_packages))
 
 setuptools.setup(
     name="enunu_kor_tool",
-    version="0.0.9",
+    version="0.0.10",
     author="cardroid",
     author_email="carbonsindh@gmail.com",
     description="enunu Korean language support script collection",
