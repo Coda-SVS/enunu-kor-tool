@@ -14,8 +14,10 @@ differ = None
 Consonants_LIST = ["ㄱ", "ㄴ", "ㄷ", "ㄹ", "ㅁ", "ㅂ", "ㅅ", "ㅇ", "ㅈ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ", "ㄲ", "ㄸ", "ㅃ", "ㅆ", "ㅉ"]
 Vowels_LIST = ["ㅏ", "ㅑ", "ㅓ", "ㅕ", "ㅗ", "ㅛ", "ㅜ", "ㅠ", "ㅡ", "ㅣ", "ㅐ", "ㅒ", "ㅔ", "ㅖ", "ㅘ", "ㅙ", "ㅚ", "ㅝ", "ㅞ", "ㅟ", "ㅢ"]
 
+# \-=+,#/\?:^$.@*"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`'…》
+
 Special_Character_Filter = [
-    " ",
+    # " ",
     "\-",
     "=",
     "+",
@@ -58,6 +60,7 @@ def __get_norm_Special_Character_Filter():
     return [c[-1] if len(c) > 1 else c for c in Special_Character_Filter]
 
 
+Special_Character_Filter_joined = "".join(Special_Character_Filter)
 Special_Character_Filter_norm = __get_norm_Special_Character_Filter()
 
 

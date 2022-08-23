@@ -3,25 +3,27 @@ from collections import deque
 
 from jamo import h2j, j2hcj
 
-from enunu_kor_tool.g2pk4utau.hangul_dic import get_phn_dictionary, replace2pre_phn, replace2phn, Special_Character_Filter
+from enunu_kor_tool.g2pk4utau.hangul_dic import get_phn_dictionary, replace2pre_phn, replace2phn, Special_Character_Filter_joined
 from enunu_kor_tool.g2pk4utau.enum_set import VerboseMode
 
 
-def isHangul(text):
-    error_count = len(list(filter(lambda t: t != "", re.findall("((?![\u3130-\u318F\uAC00-\uD7A3]).)*", text))))
+def is_in_special_character(text):
+    char_count = len(list(filter(lambda t: t != "", re.findall("[" + Special_Character_Filter_joined + "]", text))))
+    return char_count > 0
+
+
+def is_only_special_character(text):
+    error_count = len(list(filter(lambda t: t != "", re.findall("((?![" + Special_Character_Filter_joined + "]).)*", text))))
     return error_count == 0
 
 
-def isCanConvert(text, only_special_character=False):
-    fter = "((?!["
+def is_in_hangul(text):
+    char_count = len(list(filter(lambda t: t != "", re.findall("[\u3130-\u318F\uAC00-\uD7A3]", text))))
+    return char_count > 0
 
-    if not only_special_character:
-        fter += "\u3130-\u318F\uAC00-\uD7A3"
 
-    fter += "".join(Special_Character_Filter)
-    fter += "]).)*"
-
-    error_count = len(list(filter(lambda t: t != "", re.findall("((?![\u3130-\u318F\uAC00-\uD7A3" + "".join(Special_Character_Filter) + "]).)*", text))))
+def is_only_hangul(text):
+    error_count = len(list(filter(lambda t: t != "", re.findall("((?![\u3130-\u318F\uAC00-\uD7A3]).)*", text))))
     return error_count == 0
 
 
@@ -146,16 +148,16 @@ class g2pk4utau(object):
 
             if verbose.is_flag(VerboseMode.OUTPUT):
                 print("\033[1;96m[Output]\033[0m")
-                print(f"> G2P Processed: {txt}")
+                print(f"> 0 G2P Processed: {txt}")
                 word_phn_temp_list = []
                 for tokens in word_phn_list:
                     word_phn_temp_list.append("\033[1;32m,\033[0m ".join(tokens))
                 temp_output = "\033[1;33m(\033[0m" + "\033[1;33m) (\033[0m".join(word_phn_temp_list) + "\033[1;33m)\033[0m"
-                print(f"> Word Phoneme List: {temp_output}")
+                print(f"> 3 Word Phoneme List: {temp_output}")
                 temp_output = "\033[1;32m,\033[0m ".join(token_phn_list)
-                print(f"> Character Phoneme List: {temp_output}")
+                print(f"> 2 Character Phoneme List: {temp_output}")
                 temp_output = "\033[1;32m,\033[0m ".join(phn_list)
-                print(f"> Phoneme List: {temp_output}")
+                print(f"> 1 Phoneme List: {temp_output}")
 
         return "\n".join([t[0] for t in text_list]), phn_list, token_phn_list, word_phn_list
 

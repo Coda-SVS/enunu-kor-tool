@@ -18,15 +18,19 @@ import yaml
 from natsort import natsorted
 from tqdm import tqdm
 
+g2p_converter = None
+
 
 def ust2full(path_ust_dir_in, path_full_dir_out, path_table, exclude_songs, lang_mode):
     """
     複数のUSTファイルから、フルラベルファイルを一括生成する。
     """
+    global g2p_converter
+
     makedirs(path_full_dir_out, exist_ok=True)
     ust_files = glob(f"{path_ust_dir_in}/**/*.ust", recursive=True)
 
-    if lang_mode == "kor":
+    if lang_mode == "kor" and g2p_converter == None:
         from enunu_kor_tool import g2pk4utau, utaupyk
 
         # 객체 생성 시 높은 오버헤드 때문에 시간이 오래걸리는 문제 해결
@@ -46,8 +50,8 @@ def ust2full(path_ust_dir_in, path_full_dir_out, path_table, exclude_songs, lang
             else:
                 ust2hts(path_ust, path_full, path_table, strict_sinsy_style=False)
 
-    if lang_mode == "kor" and g2p_converter != None:
-        del g2p_converter
+    # if lang_mode == "kor" and g2p_converter != None:
+    #     del g2p_converter
 
 
 def compare_number_of_ustfiles_and_labfiles(ust_dir, mono_align_dir):

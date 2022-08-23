@@ -1,3 +1,4 @@
+from genericpath import isfile
 import os
 from glob import glob
 from typing import List, Union
@@ -7,6 +8,7 @@ from tqdm import tqdm
 
 from enunu_kor_tool import g2pk4utau
 from enunu_kor_tool.utaupyk._ustx2ust import Ustx2Ust_Converter
+from enunu_kor_tool.utaupyk._ust2hts import ustnote2htsnote
 
 USE_G2PK4UTAU = True
 USE_TIMELINE = True
@@ -14,12 +16,7 @@ USE_TIMELINE = True
 g2p_converter = None
 
 
-def convert(input_filepath: str, d_table: dict, g2p_converter: Union[g2pk4utau.g2pk4utau, None] = None):
-    assert os.path.isfile(input_filepath)
-
-    ust = utaupy.ust.load(input_filepath, encoding="utf-8")
-    filename = os.path.splitext(os.path.basename(input_filepath))[0]
-
+def convert(filename: str, ust: utaupy.ust.Ust, d_table: dict, g2p_converter: Union[g2pk4utau.g2pk4utau, None] = None):
     length100ns_converter = lambda nt: round(float(25000000 * (int(nt.length) / 20) / int(nt.tempo)))
 
     # 한 소절 시간 계산 (sil 음소 자동 추가 시도)
@@ -31,6 +28,9 @@ def convert(input_filepath: str, d_table: dict, g2p_converter: Union[g2pk4utau.g
     phonemes = []
     for idx in (phn_tqdm := tqdm(range(notes_len := len(ust.notes)), leave=False)):
         note = ust.notes[idx]
+        prev_note = ust.notes[idx - 1] if idx != 0 else ""
+        next_note = ust.notes[idx + 1] if idx + 1 < notes_len else ""
+        ust_note_block = [prev_note, note, next_note]
 
         s_idx = idx - range_idx
         e_idx = idx + range_idx
@@ -44,51 +44,59 @@ def convert(input_filepath: str, d_table: dict, g2p_converter: Union[g2pk4utau.g
         if note.lyric != note.lyric.strip():
             tqdm.write(f'Warning: "{note.lyric}" 불필요한 문자가 포함됨. from [{filename}]')
 
-        if g2p_converter != None and g2pk4utau.isCanConvert(note.lyric):
-            prev_note = ust.notes[idx - 1] if idx != 0 else ""
-            next_note = ust.notes[idx + 1] if idx + 1 < notes_len else ""
+        hts_note = ustnote2htsnote(ust_note_block, d_table, g2p_converter)
+        # hts_note: utaupy.hts.Note
+        phns = [phn.identity for phn in hts_note.phonemes]
 
-            note_block = (prev_note, note, next_note)
+        phn_time_length = length100ns_converter(note) / len(phns)
 
-            current_phn_idx = 1
+        for phn in phns:
+            phonemes.append((round(global_length), phn))
+            global_length += phn_time_length
 
-            orginal_lyrics = []
-            for idx in range(3):
-                if isinstance(note_block[idx], utaupy.ust.Note):
-                    if g2pk4utau.isCanConvert(note_block[idx].lyric):
-                        orginal_lyrics.append(note_block[idx].lyric)
-                    elif idx == 0:
-                        current_phn_idx = 0
+        # if g2p_converter != None and g2pk4utau.isCanConvert(note.lyric):
 
-            kor_phn_result = g2p_converter(g2pk4utau.clear_Special_Character("".join(orginal_lyrics)))
-            kor_phn_tokens = kor_phn_result[2]
+        #     note_block = (prev_note, note, next_note)
 
-            if not g2pk4utau.isHangul(note.lyric):
-                temp_phn_tokens = []
-                for ly in note.lyric:
-                    if g2pk4utau.isHangul(ly):
-                        temp_phn_tokens.append(kor_phn_tokens[current_phn_idx])
-                    else:
-                        temp_phn_tokens.extend(d_table.get(ly, ly))
-                kor_phn_token = " ".join(temp_phn_tokens)
-            else:
-                kor_phn_token: str = kor_phn_tokens[current_phn_idx]
+        #     current_phn_idx = 1
 
-            phns: List[str] = kor_phn_token.split(" ")
+        #     orginal_lyrics = []
+        #     for idx in range(3):
+        #         if isinstance(note_block[idx], utaupy.ust.Note):
+        #             if g2pk4utau.isCanConvert(note_block[idx].lyric):
+        #                 orginal_lyrics.append(note_block[idx].lyric)
+        #             elif idx == 0:
+        #                 current_phn_idx = 0
 
-            phn_time_length = length100ns_converter(note) / len(phns)
+        #     kor_phn_result = g2p_converter(g2pk4utau.clear_Special_Character("".join(orginal_lyrics)))
+        #     kor_phn_tokens = kor_phn_result[2]
 
-            for phn in phns:
-                phonemes.append((round(global_length), phn))
-                global_length += phn_time_length
-        else:
-            orginal_lyrics = note.lyric.split(" ")
+        #     if not g2pk4utau.is_not_in_hangul(note.lyric):
+        #         temp_phn_tokens = []
+        #         for ly in note.lyric:
+        #             if g2pk4utau.is_not_in_hangul(ly):
+        #                 temp_phn_tokens.append(kor_phn_tokens[current_phn_idx])
+        #             else:
+        #                 temp_phn_tokens.extend(d_table.get(ly, ly))
+        #         kor_phn_token = " ".join(temp_phn_tokens)
+        #     else:
+        #         kor_phn_token: str = kor_phn_tokens[current_phn_idx]
 
-            phn_time_length = length100ns_converter(note) / len(orginal_lyrics)
+        #     phns: List[str] = kor_phn_token.split(" ")
 
-            for lyric in orginal_lyrics:
-                phonemes.append((round(global_length), *d_table.get(lyric, [lyric])))
-                global_length += phn_time_length
+        #     phn_time_length = length100ns_converter(note) / len(phns)
+
+        #     for phn in phns:
+        #         phonemes.append((round(global_length), phn))
+        #         global_length += phn_time_length
+        # else:
+        #     orginal_lyrics = note.lyric.split(" ")
+
+        #     phn_time_length = length100ns_converter(note) / len(orginal_lyrics)
+
+        #     for lyric in orginal_lyrics:
+        #         phonemes.append((round(global_length), *d_table.get(lyric, [lyric])))
+        #         global_length += phn_time_length
 
     result = []
     phonemes_len = len(phonemes)
@@ -119,7 +127,9 @@ def ustx2lab(table_filepath: str, input_filepath: str, output_dirpath: str):
     if USE_G2PK4UTAU and g2p_converter == None:
         g2p_converter = g2pk4utau.g2pk4utau()
 
-    lab = convert(input_filepath, d_table, g2p_converter)
+    ust = utaupy.ust.load(input_filepath)
+
+    lab = convert(os.path.basename(input_filepath), ust, d_table, g2p_converter)
 
     for idx, line in enumerate(lab):
         start, end, phn = line
@@ -153,8 +163,11 @@ def main():
     USE_TIMELINE = not args["notuse_timeline"]
 
     input_files = []
-    input_files.extend(glob(os.path.join(args["input"], "*.ustx")))
-    input_files.extend(glob(os.path.join(args["input"], "*.ust")))
+    if os.path.isfile(args["input"]):
+        input_files.append(args["input"])
+    else:
+        input_files.extend(glob(os.path.join(args["input"], "*.ustx")))
+        input_files.extend(glob(os.path.join(args["input"], "*.ust")))
 
     # Duplicate input file filter
     templist = []
