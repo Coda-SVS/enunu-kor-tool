@@ -24,13 +24,42 @@ d3, e3, f3 には 'xx' を代入する。歌うときに休符の学習データ
 from typing import Tuple
 import utaupy as up
 
+from tqdm import tqdm
+
 from enunu_kor_tool import g2pk4utau
+
+
+# def note_preprocessing(note: up.ust.Note) -> bool:
+#     return g2pk4utau.isCanConvert(note.lyric)
+
+
+def lyric_preprocessing(lyric: str) -> str:
+    lyric = lyric.replace("i'am", "i am").replace("we're", "we are").replace("you're", "you are").replace("'", " ")
+    return True
+
+
+def is_lyric(note: up.ust.Note, d_table: dict) -> bool:
+    """가사 또는 음소의 여부를 반별합니다.
+
+    Args:
+        note (up.ust.Note): 노트
+
+    Returns:
+        bool: 가사일 경우 True, 아닐경우 False를 출력합니다.
+    """
+    # return not note.lyric.startswith("$")
+    for ly in note.lyric.split(" "):
+        if ly in d_table:
+            return False
+    return True
 
 
 def ustnote2htsnote(ust_note_block: Tuple[up.ust.Note, up.ust.Note, up.ust.Note], d_table: dict, g2p_converter, key_of_the_note: int = None) -> up.hts.Note:
     """
     utaupy.ust.Note を utaupy.hts.Note に変換する。
     """
+    assert len(ust_note_block) == 3
+
     # ノート全体の情報を登録
     hts_note = up.hts.Note()
     # e1
@@ -49,23 +78,63 @@ def ustnote2htsnote(ust_note_block: Tuple[up.ust.Note, up.ust.Note, up.ust.Note]
     hts_syllable = up.hts.Syllable()
 
     phonemes = []
-    if g2pk4utau.isHangul(ust_note_block[1].lyric):
-        orginal_lyrics = []
-        ust_note_block_len = len(ust_note_block)
-        for idx in range(ust_note_block_len):
+
+    ust_note_block[1].lyric = ust_note_block[1].lyric.replace("'", " ")
+
+    if is_lyric(ust_note_block[1], d_table):
+        current_phn_idx = 1
+
+        orginal_lyrics = ""
+        for idx in range(3):
             if isinstance(ust_note_block[idx], up.ust.Note):
-                if idx != 2 or g2pk4utau.isHangul(ust_note_block[idx].lyric):
-                    orginal_lyrics.append(ust_note_block[idx].lyric)
+                if is_lyric(ust_note_block[idx], d_table):
+                    orginal_lyrics += ust_note_block[idx].lyric
 
-        kor_phn_result = g2p_converter("".join(orginal_lyrics))
-        kor_phn_token = kor_phn_result[2]
+                    if idx != 2 and (
+                        not g2pk4utau.is_in_hangul(ust_note_block[idx].lyric)
+                        or (isinstance(ust_note_block[idx + 1], up.ust.Note) and not g2pk4utau.is_in_hangul(ust_note_block[idx + 1].lyric))
+                    ):
+                        orginal_lyrics += " "
+                elif idx == 0:
+                    current_phn_idx = 0
 
-        phonemes += kor_phn_token[1].split(" ")
+        kor_phn_result = g2p_converter(g2pk4utau.clear_Special_Character(orginal_lyrics))
+        if g2pk4utau.is_in_hangul(ust_note_block[1].lyric):
+            kor_phn_tokens = kor_phn_result[2][current_phn_idx]
+        else:
+            kor_phn_tokens = kor_phn_result[3][current_phn_idx]
+
+        # tqdm.write(f"[{kor_phn_tokens}]")
+        # tqdm.write(f"flag = [{ust_note_block[1].flag}]")
+        # tqdm.write(f"kor_phn_tokens = [{kor_phn_tokens}], current_phn_idx = [{current_phn_idx}]")
+        # tqdm.write(f"[{ust_note_block[1].lyric}] -> [{orginal_lyrics}] -> [{kor_phn_tokens}]")
+
+        if g2pk4utau.is_in_special_character(ust_note_block[1].lyric):
+            # 특수문자 처리
+            temp_phn_tokens = []
+            for ly in ust_note_block[1].lyric:
+                if g2pk4utau.is_in_special_character(ly):
+                    temp_phn_tokens.extend(d_table.get(ly, [ly]))
+                else:
+                    temp_phn_tokens.append(kor_phn_tokens if isinstance(kor_phn_tokens, str) else " ".join(kor_phn_tokens))
+            kor_phn_token = " ".join(temp_phn_tokens)
+
+            tqdm.write(f"\033[1;33m G* [{orginal_lyrics}] -> [{kor_phn_result[1]}] -> [{kor_phn_tokens} ({current_phn_idx})] -> [{kor_phn_token}]\033[0m")
+        else:
+            kor_phn_token: str = kor_phn_tokens if isinstance(kor_phn_tokens, str) else " ".join(kor_phn_tokens)
+
+            tqdm.write(f"\033[1;33m G  [{orginal_lyrics}] -> [{kor_phn_result[1]}] -> [{kor_phn_tokens} ({current_phn_idx})] -> [{kor_phn_token}]\033[0m")
+
+        phonemes += kor_phn_token.split(" ")
     else:
         orginal_lyrics = ust_note_block[1].lyric.split()
 
         for lyric in orginal_lyrics:
             phonemes += d_table.get(lyric, [lyric])
+
+        tqdm.write(f"\033[1;32m D  [{ust_note_block[1].lyric}] -> [{orginal_lyrics}] -> [{phonemes}]\033[0m")
+
+    # tqdm.write(f"[{phonemes}]")
 
     # 音素を追加していく
     for phoneme in phonemes:
@@ -100,16 +169,25 @@ def ustobj2songobj(ust: up.ust.Ust, d_table: dict, g2p_converter=None, key_of_th
         g2p_converter = g2pk4utau.g2pk4utau()
 
     song = up.hts.Song()
-    ust_notes = ust.notes
     # Noteオブジェクトの種類を変換
-    notes_len = len(ust_notes)
-    for idx in range(notes_len):
-        if idx == 0:
-            note_block = ("", ust_notes[idx], ust_notes[idx + 1])
-        elif idx == notes_len - 1:
-            note_block = (ust_notes[idx - 1], ust_notes[idx], "")
-        else:
-            note_block = (ust_notes[idx - 1], ust_notes[idx], ust_notes[idx + 1])
+    notes_len = len(ust.notes)
+
+    range_idx = 10
+
+    for idx in (phn_tqdm := tqdm(range(notes_len := len(ust.notes)), leave=False)):
+        s_idx = idx - range_idx
+        e_idx = idx + range_idx
+        if s_idx < 0:
+            s_idx = 0
+        if e_idx >= notes_len:
+            e_idx = notes_len - 1
+
+        phn_tqdm.set_description(f"Lyric = " + "".join([note.lyric for note in ust.notes[s_idx:e_idx]]))
+
+        prev_note = ust.notes[idx - 1] if idx != 0 else ""
+        next_note = ust.notes[idx + 1] if idx + 1 < notes_len else ""
+
+        note_block = (prev_note, ust.notes[idx], next_note)
 
         hts_note = ustnote2htsnote(note_block, d_table, g2p_converter, key_of_the_note=key_of_the_note)
         song.append(hts_note)

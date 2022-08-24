@@ -1,17 +1,104 @@
 # 해당 자소 및 음소는 공식적인 문법이 아닐 수 있습니다. (보기에 더 좋게 설계됨)
 # These consonants and phonemes may not be official grammar. (Designed to look better)
 
+from typing import List, Tuple
 import regex
 
 
 ## For Verbose
-from .enum_set import VerboseMode
+from enunu_kor_tool.g2pk4utau.enum_set import VerboseMode
 
 differ = None
 
 
 Consonants_LIST = ["ㄱ", "ㄴ", "ㄷ", "ㄹ", "ㅁ", "ㅂ", "ㅅ", "ㅇ", "ㅈ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ", "ㄲ", "ㄸ", "ㅃ", "ㅆ", "ㅉ"]
 Vowels_LIST = ["ㅏ", "ㅑ", "ㅓ", "ㅕ", "ㅗ", "ㅛ", "ㅜ", "ㅠ", "ㅡ", "ㅣ", "ㅐ", "ㅒ", "ㅔ", "ㅖ", "ㅘ", "ㅙ", "ㅚ", "ㅝ", "ㅞ", "ㅟ", "ㅢ"]
+
+# \-=+,#/\?:^$.@*"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`'…》
+
+Special_Character_Filter = [
+    # " ",
+    "\-",
+    "=",
+    "+",
+    ",",
+    "#",
+    "/",
+    "\?",
+    ":",
+    "^",
+    "$",
+    ".",
+    "@",
+    "*",
+    '"',
+    "※",
+    "~",
+    "&",
+    "%",
+    "ㆍ",
+    "!",
+    "』",
+    "\\",
+    "‘",
+    "|",
+    "\(",
+    "\)",
+    "\[",
+    "\]",
+    "\<",
+    "\>",
+    "`",
+    "'",
+    "…",
+    "》",
+]
+
+
+def __get_norm_Special_Character_Filter():
+    global Special_Character_Filter
+    return [c[-1] if len(c) > 1 else c for c in Special_Character_Filter]
+
+
+Special_Character_Filter_joined = "".join(Special_Character_Filter)
+Special_Character_Filter_norm = __get_norm_Special_Character_Filter()
+
+
+def clear_Special_Character(text: str) -> str:
+    return regex.sub("[" + "".join(Special_Character_Filter) + "]", "", text)
+
+
+def replace2pre_phn(origin_text: str, verbose: VerboseMode = VerboseMode.NONE) -> Tuple[str, List[Tuple[int, int, str]]]:
+    verbose__ = verbose.is_flag(verbose.PREPHN)
+
+    pre_phns = []
+    result_str = []
+
+    fter = "[" + "".join(Special_Character_Filter) + "]"
+
+    word_idx = 0
+    for char in origin_text:
+        if regex.match(fter, char) != None:
+            pre_phns.append((len(result_str), word_idx, char))  # 현재 위치, 단어 단위 위치, 문자
+        else:
+            if char == " ":
+                word_idx += 1
+            result_str.append(char)
+
+    if verbose__:
+        temp_dict = {}
+        for idx, word_idx, phn in pre_phns:
+            if (phn_space := temp_dict.get(phn)) == None:
+                phn_space = []
+                temp_dict[phn] = phn_space
+            phn_space.append(idx)
+
+        for key, list in temp_dict.items():
+            print(f"[\033[1;32m{key}\033[0m] ({len(list)}) : {list}")
+
+        print(f"\033[1;33mLIST\033[0m: {pre_phns}")
+
+    return "".join(result_str), pre_phns
 
 
 def replace2phn(dic: dict, jamo_text: str, verbose: VerboseMode = VerboseMode.NONE):
@@ -67,19 +154,19 @@ def get_phn_dictionary(labeling_mode: bool = True):
     ##### 전처리 #####
     pre_regex_list = [
         # 종성 'ㄹ'과 초성 'ㄹ'이 만날 경우 둘 다 'l'로 발음
-        (r"ㄹ(\s*)ㄹ", r"l\1 l "),
+        (r"ㄹ(\s*)ㄹ", r"L\1 l "),
         # 모음 뒤, 'ㅎ' 앞의 'ㄹ'
-        (r"ㄹ(\s*)ㅎ", r"r\1 h "),
+        (r"ㄹ(\s*)ㅎ", r"RR\1 "),
         # 모음과 모음 사이 'ㄹ'
         (r"(?<=[ㅏ-ㅣ]\s*)ㄹ(?=\s*[ㅏ-ㅣ])", r"r "),
     ]
 
     if labeling_mode:
-        pre_regex_list.append((r"(?<=ㄱ)(\s*)ㅆ", r"k\1ss "))
-        pre_regex_list.append((r"(?<=ㅂ)(\s*)ㅆ", r"p\1ss "))
+        pre_regex_list.append((r"(?<=ㄱ)(\s*)ㅆ", r"\1K ss "))
+        pre_regex_list.append((r"(?<=ㅂ)(\s*)ㅆ", r"\1P ss "))
     else:
-        pre_regex_list.append((r"(?<=ㄱ\s*)ㅆ", r"kss "))
-        pre_regex_list.append((r"(?<=ㅂ\s*)ㅆ", r"pss "))
+        pre_regex_list.append((r"(?<=ㄱ\s*)ㅆ", r"Kss "))
+        pre_regex_list.append((r"(?<=ㅂ\s*)ㅆ", r"Pss "))
 
     ########
     # 초성 #
@@ -178,19 +265,12 @@ def get_phn_dictionary(labeling_mode: bool = True):
         (r"ㄷ", r"T "),
         # 압, 앞 ... 등에 쓰이는 받침
         (r"ㅂ", r"P "),
-        # 유성 받침은 초성과 발음이 유사
         # # 안 ... 등에 쓰이는 받침
-        # (r"ㄴ", r"N "),
+        (r"ㄴ", r"N "),
         # # 알 ... 등에 쓰이는 받침
-        # (r"ㄹ", r"L "),
+        (r"ㄹ", r"L "),
         # # 암 ... 등에 쓰이는 받침
-        # (r"ㅁ", r"M "),
-        # 안 ... 등에 쓰이는 받침
-        (r"ㄴ", r"n "),
-        # 알 ... 등에 쓰이는 받침
-        (r"ㄹ", r"l "),
-        # 암 ... 등에 쓰이는 받침
-        (r"ㅁ", r"m "),
+        (r"ㅁ", r"M "),
         # 앙 ... 등에 쓰이는 받침 (유성 받침, 초성에서 발음이 없음)
         (r"ㅇ", r"NG "),
     ]
