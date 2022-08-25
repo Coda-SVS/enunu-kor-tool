@@ -2,6 +2,10 @@
 # from posixpath import basename, splitext
 import setuptools
 
+required_packages = [
+    "colorlog",
+]
+
 g2p4utau_required_packages = [
     "jamo==0.4.1",
     "regex",
@@ -29,7 +33,7 @@ total_required_packages = list(set(total_required_packages))
 
 setuptools.setup(
     name="enunu_kor_tool",
-    version="0.0.10",
+    version="0.0.11",
     author="cardroid",
     author_email="carbonsindh@gmail.com",
     description="enunu Korean language support script collection",
@@ -42,8 +46,9 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "g2pk4utau=enunu_kor_tool.g2pk4utau.g2pk4utau:main",
-            "ustx2lab=enunu_kor_tool.ustx2lab:main",
-            "lab2ntlab=enunu_kor_tool.lab2ntlab:main",
+            "ustx2lab=enunu_kor_tool.entry.ustx2lab:main",
+            "lab2ntlab=enunu_kor_tool.entry.lab2ntlab:main",
+            "analysis4vb=enunu_kor_tool.analysis4vb.analysis:main",
         ]
     },
 )
