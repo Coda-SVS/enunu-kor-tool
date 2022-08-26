@@ -24,6 +24,10 @@ ustx2lab_required_packages = [
     "tqdm",
 ]
 
+analysis4vb_required_packages = [
+    "matplotlib==3.5.3",
+]
+
 total_required_packages = []
 total_required_packages += g2p4utau_required_packages
 total_required_packages += utaupyk_required_packages

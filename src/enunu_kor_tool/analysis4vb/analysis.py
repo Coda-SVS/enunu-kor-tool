@@ -4,8 +4,9 @@ import shutil
 
 from enunu_kor_tool import utils, log
 from enunu_kor_tool.utaupyk._ustx2ust import Ustx2Ust_Converter
+from enunu_kor_tool.analysis4vb.runner import analysis_runner
 from enunu_kor_tool.analysis4vb.model import DB_Info, DB_Files
-from enunu_kor_tool.analysis4vb.config import DEFAULT_CONFIG
+from enunu_kor_tool.analysis4vb.config import DEFAULT_CONFIG, DEFAULT_YAML_CONFIG
 
 
 def main():
@@ -33,7 +34,9 @@ def main():
         else:
             config = DEFAULT_CONFIG
             logger.warning(f"Config 파일이 존재하지 않습니다. Path=[{args['config']}]\n[{args['input']}] 내부에 Config 파일을 생성합니다.")
-            utils.save_yaml(args["config"], config)
+
+            with open(args["config"], "w", encoding="utf-8") as f:
+                f.write(DEFAULT_YAML_CONFIG)
     else:
         config = utils.load_yaml(args["config"])
 
@@ -62,8 +65,9 @@ def main():
 
     db_info = DB_Info(db_path, db_name, db_temp_path, db_files, config)
 
-    print(db_info)
-    logger.info(db_info)
+    analysis_runner(db_info, logger)
+
+    # logger.info(db_info)
 
     logger.info("Done.")
 

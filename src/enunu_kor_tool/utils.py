@@ -22,11 +22,11 @@ def load_json(path: str) -> Any:
     return obj
 
 
-def save_yaml(path: str, obj: Any, indent: int = 4):
+def save_yaml(path: str, obj: Any, indent: int = 2):
     if not path.endswith(".yaml"):
         path = os.path.splitext(path)[0] + ".yaml"
     with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(obj, f, indent=indent, sort_keys=False, Loader=yaml.FullLoader)
+        yaml.dump(obj, f, indent=indent, sort_keys=False, allow_unicode=True)
 
 
 def load_yaml(path: str) -> Any:

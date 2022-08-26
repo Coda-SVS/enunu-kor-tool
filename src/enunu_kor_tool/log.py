@@ -43,7 +43,7 @@ def get_logger(name: Union[str, Callable], logLevel: int = logging.INFO) -> logg
         module_path = path.split(os.sep)
         paths = []
         for path_name in reversed(module_path):
-            if path_name == "ekt":
+            if path_name == "enunu_kor_tool":
                 break
             paths.append(path_name)
         paths.append(name.__name__)

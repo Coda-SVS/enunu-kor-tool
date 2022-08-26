@@ -3,10 +3,10 @@ from typing import Dict
 
 
 class DictBase:
-    data: Dict
+    _data: Dict = {}
 
     def as_dict(self) -> Dict:
-        return self.data
+        return self._data
 
     def __str__(self) -> str:
-        return pformat(self.data)
+        return pformat(self._data)
