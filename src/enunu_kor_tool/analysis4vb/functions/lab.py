@@ -144,9 +144,12 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         logger.debug("그래프 출력 중...")
         graph_path = db_info.config.output.graph
 
-        utils.matplotlib_init()
+        utils.matplotlib_init(db_info.config.options["graph_darkmode"])
         from matplotlib import pyplot as plt
 
+        #####
+        # * # 단일 음소 개수 그래프
+        #####
         plot_name = "phoneme_count_single"
         plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=100)
 
@@ -165,6 +168,9 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         if is_show_graph:
             plt.show(block=False)
 
+        #####
+        # * # 그룹 음소 개수 그래프
+        #####
         plot_name = "phoneme_count_group"
         plt.figure(utils.get_plot_num(plot_name), dpi=100)
 
@@ -202,22 +208,31 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
 
     group_phoneme_length_dict = {}
     single_phoneme_length_dict = {}
+    single_phoneme_lengths_list = {}
     phoneme_length_dict = {
         "group": group_phoneme_length_dict,
         "single": single_phoneme_length_dict,
+        "single_lengths": single_phoneme_lengths_list,
     }
 
     def add_one(dic: Dict, name: str, length: int):
-        if name not in dic:
-            dic[name] = __100ns2s(length)
-        else:
+        if name in dic:
             dic[name] += __100ns2s(length)
+        else:
+            dic[name] = __100ns2s(length)
+
+    def add_one_list(dic: Dict, name: str, length: int):
+        if name in dic:
+            dic[name].append(__100ns2s(length))
+        else:
+            dic[name] = [__100ns2s(length)]
 
     for file, lab in (labs_tqdm := tqdm(labs.items(), leave=False)):
         labs_tqdm.set_description(f"[{file}] Calculating...")
 
         for start, end, phn in lab:
             add_one(single_phoneme_length_dict, phn, end - start)
+            add_one_list(single_phoneme_lengths_list, phn, end - start)
 
             if phn in phonemes_config.consonant:
                 add_one(group_phoneme_length_dict, "consonant", end - start)
@@ -234,10 +249,14 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
         logger.debug("그래프 출력 중...")
         graph_path = db_info.config.output.graph
 
-        utils.matplotlib_init()
+        utils.matplotlib_init(db_info.config.options["graph_darkmode"])
         from matplotlib import pyplot as plt
         import matplotlib.ticker as mticker
+        import random
 
+        #####
+        # * # 단일 음소 길이 그래프
+        #####
         plot_name = "phoneme_length_single"
         plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=100)
 
@@ -258,6 +277,9 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
         if is_show_graph:
             plt.show(block=False)
 
+        #####
+        # * # 그룹 음소 길이 그래프
+        #####
         plot_name = "phoneme_length_group"
         plt.figure(utils.get_plot_num(plot_name), dpi=100)
 
@@ -276,6 +298,38 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
 
         plt.title("Phonemes Length Statistics by Group (그룹별 음소 길이 통계)")
         plt.xlabel("Phoneme Group (음소 그룹)")
+        plt.ylabel("Length (길이)")
+        plt.tight_layout()
+
+        if is_save_graph:
+            plt.savefig(os.path.join(graph_path, f"{plot_name}.jpg"), dpi=200)
+        if is_show_graph:
+            plt.show(block=False)
+
+        #####
+        # * # 단일 음소 길이 그래프 [Box plot]
+        #####
+        plot_name = "phoneme_length_single_box"
+        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=100)
+
+        single_phoneme_lengths_list_graph_data = {}
+        for key in single_phoneme_lengths_list.keys():
+            if key not in phonemes_config.silence:
+                single_phoneme_lengths_list_graph_data[key] = single_phoneme_lengths_list[key]
+
+        single_phoneme_length_sorted_dict = dict(sorted(single_phoneme_lengths_list_graph_data.items(), key=lambda item: sum(item[1]), reverse=True))
+        keys, values = list(single_phoneme_length_sorted_dict.keys()), list(single_phoneme_length_sorted_dict.values())
+        plt.boxplot(values, notch=True)
+        plt.xticks(list(range(1, len(keys) + 1)), keys)
+
+        for i, v in enumerate(values, 1):
+            x = [i + random.uniform(-0.04, 0.04) for _ in range(len(v))]
+            plt.scatter(x, v)
+
+        plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2fs"))
+
+        plt.title("Phonemes Length Statistics (음소 길이 통계) [Box plot]")
+        plt.xlabel("Phoneme (음소)")
         plt.ylabel("Length (길이)")
         plt.tight_layout()
 
