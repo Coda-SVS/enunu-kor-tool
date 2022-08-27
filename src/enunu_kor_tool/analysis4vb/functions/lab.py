@@ -1,9 +1,10 @@
 import logging
+import os
 from typing import Dict
 
 from tqdm import tqdm
 
-from enunu_kor_tool import log
+from enunu_kor_tool import log, utils
 from enunu_kor_tool.analysis4vb.model import DB_Info
 
 
@@ -37,6 +38,7 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
     error_flag = False
     labs = {}
     lab_global_line_count = 0
+    lab_global_error_line_count = 0
     for file in (file_tqdm := tqdm(phonemes_files, leave=False)):
         file_tqdm.set_description(f"Processing... [{file}]")
         logger.info(f"[{file}] 파일 로드 중...")
@@ -79,9 +81,10 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
         if error_line_count > 0:
             logger.warning(f"총 [{line_num_formatter(error_line_count)}] 개의 오류가 발견되었습니다.")
             error_flag = True
+            lab_global_error_line_count += error_line_count
 
         labs[file] = lab
-    logger.info(f"모든 lab 파일을 로드했습니다. [lab 파일 수: {len(labs)}] [총 라인 수: {lab_global_line_count}]")
+    logger.info(f"모든 lab 파일을 로드했습니다. [lab 파일 수: {len(labs)}] [총 라인 수: {lab_global_line_count}] [오류 라인 수: {lab_global_error_line_count}]")
     db_info.cache["labs"] = labs
 
     return error_flag
@@ -97,6 +100,8 @@ def lab_error_check(db_info: DB_Info, logger: logging.Logger):
 @__preprocess
 def phoneme_count(db_info: DB_Info, logger: logging.Logger):
     phonemes_config = db_info.config.phonemes
+    is_show_graph = db_info.config.options["graph_show"]
+    is_save_graph = db_info.config.options["graph_save"]
     labs: Dict = db_info.cache["labs"]
 
     group_phoneme_count_dict = {}
@@ -128,6 +133,46 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
                 add_one(group_phoneme_count_dict, "other")
             else:
                 add_one(group_phoneme_count_dict, "error")
+
+    if is_show_graph or is_save_graph:
+        logger.debug("그래프 출력 중...")
+        graph_path = db_info.config.output.graph
+
+        utils.matplotlib_init()
+        from matplotlib import pyplot as plt
+
+        plt.figure(0, figsize=(16, 6), dpi=100)
+
+        single_phoneme_count_sorted_dict = dict(sorted(single_phoneme_count_dict.items(), key=lambda item: item[1], reverse=True))
+        keys, values = list(single_phoneme_count_sorted_dict.keys()), list(single_phoneme_count_sorted_dict.values())
+        b1 = plt.bar(keys, values, width=0.7)
+        plt.bar_label(b1)
+
+        plt.title("Phones Count Statistics (음소 개수 통계)")
+        plt.xlabel("Phoneme (음소)")
+        plt.ylabel("Count (개수)")
+        plt.tight_layout()
+
+        if is_save_graph:
+            plt.savefig(os.path.join(graph_path, "phoneme_count_single.jpg"), dpi=200)
+        if is_show_graph:
+            plt.show(block=False)
+
+        plt.figure(1, dpi=100)
+
+        keys, values = list(group_phoneme_count_dict.keys()), list(group_phoneme_count_dict.values())
+        b1 = plt.bar(keys, values, width=0.7)
+        plt.bar_label(b1)
+
+        plt.title("Phones Count Statistics by Group (그룹별 음소 개수 통계)")
+        plt.xlabel("Phoneme Group (음소 그룹)")
+        plt.ylabel("Count (개수)")
+        plt.tight_layout()
+
+        if is_save_graph:
+            plt.savefig(os.path.join(graph_path, "phoneme_count_group.jpg"), dpi=200)
+        if is_show_graph:
+            plt.show()
 
     db_info.stats["phoneme_count"] = phoneme_count_dict
     return phoneme_count_dict

@@ -38,3 +38,17 @@ def load_yaml(path: str) -> Any:
         obj = yaml.load(f, Loader=yaml.FullLoader)
 
     return obj
+
+
+IS_MATPLOTLIB_INIT = False
+
+
+def matplotlib_init():
+    global IS_MATPLOTLIB_INIT
+
+    if not IS_MATPLOTLIB_INIT:
+        import matplotlib
+
+        matplotlib.rcParams["font.family"] = "Malgun Gothic"
+        matplotlib.rcParams["axes.unicode_minus"] = False
+        IS_MATPLOTLIB_INIT = True

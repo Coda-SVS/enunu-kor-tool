@@ -11,7 +11,8 @@ DEFAULT_CONFIG = {
     "options": {
         "log_level": "info",
         "encoding": "utf-8",
-        "graph_output": True,
+        "graph_save": True,
+        "graph_show": True,
     },
     "funcs": list(FUNC_LIST.keys()),
     "phonemes": {
