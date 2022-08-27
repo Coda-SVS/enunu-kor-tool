@@ -93,3 +93,41 @@ def lab_error_check(db_info: DB_Info, logger: logging.Logger):
     logger.info("검사 완료.")
     pass
 
+
+@__preprocess
+def phoneme_count(db_info: DB_Info, logger: logging.Logger):
+    phonemes_config = db_info.config.phonemes
+    labs: Dict = db_info.cache["labs"]
+
+    group_phoneme_count_dict = {}
+    single_phoneme_count_dict = {}
+    phoneme_count_dict = {
+        "group": group_phoneme_count_dict,
+        "single": single_phoneme_count_dict,
+    }
+
+    def add_one(dic: Dict, name: str):
+        if name not in dic:
+            dic[name] = 1
+        else:
+            dic[name] += 1
+
+    for file, lab in (labs_tqdm := tqdm(labs.items(), leave=False)):
+        labs_tqdm.set_description(f"[{file}] Counting...")
+
+        for start, end, phn in lab:
+            add_one(single_phoneme_count_dict, phn)
+
+            if phn in phonemes_config.consonant:
+                add_one(group_phoneme_count_dict, "consonant")
+            elif phn in phonemes_config.vowel:
+                add_one(group_phoneme_count_dict, "vowel")
+            elif phn in phonemes_config.silence:
+                add_one(group_phoneme_count_dict, "silence")
+            elif phn in phonemes_config.other:
+                add_one(group_phoneme_count_dict, "other")
+            else:
+                add_one(group_phoneme_count_dict, "error")
+
+    db_info.stats["phoneme_count"] = phoneme_count_dict
+    return phoneme_count_dict
