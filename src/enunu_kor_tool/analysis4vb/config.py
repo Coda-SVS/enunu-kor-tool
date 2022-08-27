@@ -14,6 +14,7 @@ DEFAULT_CONFIG = {
         "graph_save": True,
         "graph_show": True,
         "graph_darkmode": True,
+        "graph_show_dpi": 100,
     },
     "funcs": list(FUNC_LIST.keys()),
     "phonemes": {

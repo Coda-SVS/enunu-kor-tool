@@ -73,19 +73,19 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
         global_length = 0
         for idx, (start, end, phn) in enumerate(lab, 1):
             if phn not in db_info.config.phonemes.all:
-                logger.warning(f"[Line {line_num_formatter(idx)}] [{phn}] Config에 명시되지 않은 음소가 사용되었습니다.")
+                logger.warning(f"[Line {line_num_formatter(idx)}] [{phn}] Config에 명시되지 않은 음소가 사용되었습니다. ({file})")
                 error_line_count += 1
             if start >= end:
-                logger.warning(f"[Line {line_num_formatter(idx)}] 종료시점이 시작지점보다 빠릅니다.")
+                logger.warning(f"[Line {line_num_formatter(idx)}] 종료시점이 시작지점보다 빠릅니다. ({file})")
                 error_line_count += 1
             if global_length != start:
-                logger.warning(f"[Line {line_num_formatter(idx)}] 시작시점이 이전 종료지점과 다릅니다.")
+                logger.warning(f"[Line {line_num_formatter(idx)}] 시작시점이 이전 종료지점과 다릅니다. ({file})")
                 error_line_count += 1
 
             global_length = end
 
         if error_line_count > 0:
-            logger.warning(f"총 [{line_num_formatter(error_line_count)}] 개의 오류가 발견되었습니다.")
+            logger.warning(f"총 [{line_num_formatter(error_line_count)}] 개의 오류가 발견되었습니다. ({file})")
             error_flag = True
             lab_global_error_line_count += error_line_count
 
@@ -143,6 +143,7 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
     if is_show_graph or is_save_graph:
         logger.debug("그래프 출력 중...")
         graph_path = db_info.config.output.graph
+        graph_show_dpi = db_info.config.options["graph_show_dpi"]
 
         utils.matplotlib_init(db_info.config.options["graph_darkmode"])
         from matplotlib import pyplot as plt
@@ -151,7 +152,7 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         # * # 단일 음소 개수 그래프
         #####
         plot_name = "phoneme_count_single"
-        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=100)
+        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=graph_show_dpi)
 
         single_phoneme_count_sorted_dict = dict(sorted(single_phoneme_count_dict.items(), key=lambda item: item[1], reverse=True))
         keys, values = list(single_phoneme_count_sorted_dict.keys()), list(single_phoneme_count_sorted_dict.values())
@@ -172,7 +173,7 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         # * # 그룹 음소 개수 그래프
         #####
         plot_name = "phoneme_count_group"
-        plt.figure(utils.get_plot_num(plot_name), dpi=100)
+        plt.figure(utils.get_plot_num(plot_name), dpi=graph_show_dpi)
 
         keys, values = list(group_phoneme_count_dict.keys()), list(group_phoneme_count_dict.values())
         total_length = sum(values)
@@ -248,6 +249,7 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
     if is_show_graph or is_save_graph:
         logger.debug("그래프 출력 중...")
         graph_path = db_info.config.output.graph
+        graph_show_dpi = db_info.config.options["graph_show_dpi"]
 
         utils.matplotlib_init(db_info.config.options["graph_darkmode"])
         from matplotlib import pyplot as plt
@@ -258,7 +260,7 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
         # * # 단일 음소 길이 그래프
         #####
         plot_name = "phoneme_length_single"
-        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=100)
+        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=graph_show_dpi)
 
         single_phoneme_length_sorted_dict = dict(sorted(single_phoneme_length_dict.items(), key=lambda item: item[1], reverse=True))
         keys, values = list(single_phoneme_length_sorted_dict.keys()), list(single_phoneme_length_sorted_dict.values())
@@ -281,7 +283,7 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
         # * # 그룹 음소 길이 그래프
         #####
         plot_name = "phoneme_length_group"
-        plt.figure(utils.get_plot_num(plot_name), dpi=100)
+        plt.figure(utils.get_plot_num(plot_name), dpi=graph_show_dpi)
 
         keys, values = list(group_phoneme_length_dict.keys()), list(group_phoneme_length_dict.values())
         total_length = sum(values)
@@ -310,7 +312,7 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
         # * # 단일 음소 길이 그래프 [Box plot]
         #####
         plot_name = "phoneme_length_single_box"
-        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=100)
+        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=graph_show_dpi)
 
         single_phoneme_lengths_list_graph_data = {}
         for key in single_phoneme_lengths_list.keys():
@@ -322,8 +324,9 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
         plt.boxplot(values, notch=True)
         plt.xticks(list(range(1, len(keys) + 1)), keys)
 
+        scatter_range = 0.15
         for i, v in enumerate(values, 1):
-            x = [i + random.uniform(-0.04, 0.04) for _ in range(len(v))]
+            x = [i + random.uniform(-scatter_range, scatter_range) for _ in range(len(v))]
             plt.scatter(x, v)
 
         plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2fs"))
