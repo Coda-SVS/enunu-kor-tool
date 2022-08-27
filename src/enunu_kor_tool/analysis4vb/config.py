@@ -3,9 +3,15 @@ import yaml
 from enunu_kor_tool.analysis4vb.functions import FUNC_LIST
 
 DEFAULT_CONFIG = {
+    "output": {
+        "stats": "%(db_path)s/stats",
+        "graph": "%(db_path)s/stats/graph",
+        "temp": "%(db_path)s/temp",
+    },
     "options": {
         "log_level": "info",
         "encoding": "utf-8",
+        "graph_output": True,
     },
     "funcs": list(FUNC_LIST.keys()),
     "phonemes": {

@@ -1,8 +1,9 @@
-from glob import glob
 import os
 import shutil
+from glob import glob
 
 from enunu_kor_tool import utils, log
+from enunu_kor_tool.analysis4vb.model.config import DB_Config
 from enunu_kor_tool.utaupyk._ustx2ust import Ustx2Ust_Converter
 from enunu_kor_tool.analysis4vb.runner import analysis_runner
 from enunu_kor_tool.analysis4vb.model import DB_Info, DB_Files
@@ -43,17 +44,17 @@ def main():
         logger.debug("성공적으로 Config를 읽었습니다.")
 
     db_path = args["input"]
-    db_temp_path = os.path.join(db_path, "temp")  # TODO: 임시파일 처리 로직 개선 가능
+    db_config = DB_Config(db_path, config)
     db_name = os.path.basename(db_path)
 
     db_raw_ustx_files = glob(os.path.join(db_path, "**", "*.ustx"), recursive=True)
 
     if len(db_raw_ustx_files) > 0:
-        os.makedirs(db_temp_path, exist_ok=True)
+        os.makedirs(db_config.output.temp, exist_ok=True)
         for ustx_path in db_raw_ustx_files:
             if (ustx_path_split := os.path.splitext(ustx_path))[1] == ".ustx":
                 converter = Ustx2Ust_Converter(ustx_path, encoding="utf-8")
-                converter.save_ust(os.path.join(db_temp_path, os.path.basename(ustx_path_split[0]) + ".ust"))
+                converter.save_ust(os.path.join(db_config.output.temp, os.path.basename(ustx_path_split[0]) + ".ust"))
 
     db_files = DB_Files(
         db_raw_ustx_files,
@@ -65,7 +66,7 @@ def main():
     if not (len(db_files.ustx) == len(db_files.ust) == len(db_files.lab) == len(db_files.wav)):
         logger.warning(f"데이터의 개수가 일치하지 않습니다.\nustx=[{len(db_files.ustx)} 개]\nust=[{len(db_files.ust)} 개]\nlab=[{len(db_files.lab)} 개]\nwav=[{len(db_files.wav)} 개]")
 
-    db_info = DB_Info(db_path, db_name, db_temp_path, db_files, config)
+    db_info = DB_Info(db_path, db_name, db_files, db_config)
 
     analysis_runner(db_info)
 
@@ -73,8 +74,8 @@ def main():
 
     logger.info("Done.")
 
-    if os.path.exists(db_temp_path):
-        shutil.rmtree(db_temp_path)
+    if os.path.exists(db_info.config.output.temp):
+        shutil.rmtree(db_info.config.output.temp)
 
     logger.info("Cleaned up.")
 
