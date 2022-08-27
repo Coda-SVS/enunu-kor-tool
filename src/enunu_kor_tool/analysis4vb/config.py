@@ -1,13 +1,13 @@
 import yaml
 
+from enunu_kor_tool.analysis4vb.functions import FUNC_LIST
+
 DEFAULT_CONFIG = {
     "options": {
         "log_level": "info",
         "encoding": "utf-8",
     },
-    "funcs": [
-        "phoneme_count",
-    ],
+    "funcs": list(FUNC_LIST.keys()),
     "phonemes": {
         "silence": ["pau", "sil", "br"],
         "consonant": ["g", "n", "d", "r", "l", "m", "b", "s", "j", "ch", "k", "t", "p", "h", "kk", "tt", "pp", "ss", "jj", "K", "T", "P", "N", "RR", "L", "M", "NG"],
