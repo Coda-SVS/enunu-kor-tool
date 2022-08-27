@@ -25,22 +25,29 @@ def main():
 
     log.DIR_PATH = os.path.join(args["input"], "logs")
 
-    logger = log.get_logger("analysis4vb")
+    def get_root_module_logger():
+        loglevel = options.get("log_level", "info") if (options := config.get("options")) != None else "info"
+        return log.get_logger("analysis4vb", loglevel)
 
     if not isinstance(args.get("config"), str) or not os.path.isfile(args["config"]):
         args["config"] = os.path.join(args["input"], "analysis_config.yaml")
 
         if os.path.isfile(args["config"]):
             config = utils.load_yaml(args["config"])
+            logger = get_root_module_logger()
+
             logger.debug("DB 내부의 Config를 읽었습니다.")
         else:
             config = DEFAULT_CONFIG
-            logger.warning(f"Config 파일이 존재하지 않습니다. Path=[{args['config']}]\n[{args['input']}] 내부에 기본값 Config 파일을 생성합니다.")
 
             with open(args["config"], "w", encoding="utf-8") as f:
                 f.write(DEFAULT_YAML_CONFIG)
+
+            logger = get_root_module_logger()
+            logger.warning(f"Config 파일이 존재하지 않습니다. Path=[{args['config']}]\n[{args['input']}] 내부에 기본값 Config 파일을 생성합니다.")
     else:
         config = utils.load_yaml(args["config"])
+        logger = get_root_module_logger()
         logger.debug("성공적으로 Config를 읽었습니다.")
 
     db_path = args["input"]
@@ -69,8 +76,6 @@ def main():
     db_info = DB_Info(db_path, db_name, db_files, db_config)
 
     analysis_runner(db_info)
-
-    # logger.info(db_info)
 
     logger.info("Done.")
 
