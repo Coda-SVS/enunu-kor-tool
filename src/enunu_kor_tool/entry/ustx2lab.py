@@ -1,7 +1,6 @@
-from genericpath import isfile
 import os
 from glob import glob
-from typing import List, Union
+from typing import Union
 
 import utaupy
 from tqdm import tqdm

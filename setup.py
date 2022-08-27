@@ -4,6 +4,9 @@ import setuptools
 
 required_packages = [
     "colorlog",
+    "tqdm",
+    "pyyaml==5.4.1",
+    "utaupy==1.18.0",
 ]
 
 g2p4utau_required_packages = [
@@ -13,16 +16,11 @@ g2p4utau_required_packages = [
 ]
 
 utaupyk_required_packages = [
-    "utaupy==1.18.0",
-    "tqdm",
-    "pyyaml==5.4.1",
     "natsort",
 ]
 
-ustx2lab_required_packages = [
-    "utaupy==1.18.0",
-    "tqdm",
-]
+# ustx2lab_required_packages = [
+# ]
 
 analysis4vb_required_packages = [
     "matplotlib==3.5.3",
@@ -30,9 +28,11 @@ analysis4vb_required_packages = [
 ]
 
 total_required_packages = []
+total_required_packages += required_packages
 total_required_packages += g2p4utau_required_packages
 total_required_packages += utaupyk_required_packages
-total_required_packages += ustx2lab_required_packages
+# total_required_packages += ustx2lab_required_packages
+total_required_packages += analysis4vb_required_packages
 
 total_required_packages = list(set(total_required_packages))
 
@@ -42,9 +42,16 @@ setuptools.setup(
     author="cardroid",
     author_email="carbonsindh@gmail.com",
     description="enunu Korean language support script collection",
-    install_requires=total_required_packages,
+    install_requires=required_packages,
     license="MIT",
     packages=setuptools.find_packages(where="src"),
+    extras_require={
+        "all": total_required_packages,
+        "g2p4utau": g2p4utau_required_packages,
+        "utaupyk": g2p4utau_required_packages + utaupyk_required_packages,
+        "ustx2lab": g2p4utau_required_packages + utaupyk_required_packages,  # + ustx2lab_required_packages,
+        "analysis4vb": analysis4vb_required_packages,
+    },
     package_dir={"": "src"},
     python_requires=">=3.8",
     include_package_data=True,
