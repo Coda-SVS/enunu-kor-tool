@@ -26,6 +26,7 @@ ustx2lab_required_packages = [
 
 analysis4vb_required_packages = [
     "matplotlib==3.5.3",
+    "mergedeep==1.3.4",
 ]
 
 total_required_packages = []
