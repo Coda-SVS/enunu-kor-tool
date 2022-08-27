@@ -44,15 +44,19 @@ IS_MATPLOTLIB_INIT = False
 PLOT_COUNT_DICT = {}
 
 
-def matplotlib_init():
+def matplotlib_init(useDarkMode: bool = True):
     global IS_MATPLOTLIB_INIT
 
     if not IS_MATPLOTLIB_INIT:
         import matplotlib
+        from matplotlib import pyplot
 
         matplotlib.rcParams["font.family"] = "Malgun Gothic"
         matplotlib.rcParams["axes.unicode_minus"] = False
         IS_MATPLOTLIB_INIT = True
+
+        if useDarkMode:
+            pyplot.style.use(["dark_background"])
 
 
 def get_plot_num(plot_name: str) -> int:

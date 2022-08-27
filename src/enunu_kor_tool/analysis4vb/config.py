@@ -13,6 +13,7 @@ DEFAULT_CONFIG = {
         "encoding": "utf-8",
         "graph_save": True,
         "graph_show": True,
+        "graph_darkmode": True,
     },
     "funcs": list(FUNC_LIST.keys()),
     "phonemes": {
