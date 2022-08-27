@@ -23,13 +23,29 @@ sys.excepthook = unhandled_exception_hook
 
 DIR_PATH = "logs"
 
+LOG_LEVEL_DICT = {
+    "critical": 50,
+    "crit": 50,
+    "fatal": 50,
+    "error": 40,
+    "err": 40,
+    "warning": 30,
+    "warn": 30,
+    "info": 20,
+    "information": 20,
+    "verbose": 10,
+    "verb": 10,
+    "debug": 10,
+    "notset": 0,
+}
 
-def get_logger(name: Union[str, Callable], logLevel: int = logging.INFO) -> logging.Logger:
+
+def get_logger(name: Union[str, Callable], logLevel: Union[int, str] = logging.INFO) -> logging.Logger:
     """로거를 생성합니다.
 
     Args:
         name (Union[str, Callable]): 로거 이름 또는 호출 함수
-        logLevel (LogLevel, optional): 출력 로그 레벨. Default value is the value of SETTINGS.
+        logLevel (Union[int, str], optional): 출력 로그 레벨. Default value is the value of SETTINGS.
 
     Returns:
         logging.Logger: 로거
@@ -49,18 +65,27 @@ def get_logger(name: Union[str, Callable], logLevel: int = logging.INFO) -> logg
         paths.append(name.__name__)
         name = ".".join(paths)
 
-    os.makedirs(DIR_PATH, exist_ok=True)
-
     if not logging.root.hasHandlers():
-        root_logger_setup(DIR_PATH, logLevel)
+        os.makedirs(DIR_PATH, exist_ok=True)
+        root_logger_setup(DIR_PATH)
 
     logger = logging.getLogger(name)
+
+    if isinstance(logLevel, str):
+        if (ll := LOG_LEVEL_DICT.get(logLevel.lower())) != None:
+            logLevel = ll
+        else:
+            try:
+                logLevel = int(logLevel)
+            except:
+                raise NotImplementedError("지원하지 않는 로그레벨 입니다.")
+
     logger.setLevel(logLevel)
 
     return logger
 
 
-def get_default_config(dirpath: str, logLevel: int) -> Dict:
+def get_default_config(dirpath: str) -> Dict:
     using_root_handlers = ["console", "file", "warn_file"]
 
     get_fullname = lambda c: c.__qualname__ if (module := c.__module__) == "builtins" else module + "." + c.__qualname__
@@ -82,12 +107,14 @@ def get_default_config(dirpath: str, logLevel: int) -> Dict:
         },
         "formatters": {
             "detail": {
-                "format": "%(asctime)s %(levelname)-8s [%(name)s] [%(thread)d][%(filename)s:%(lineno)d] - %(message)s",
+                # "format": "%(asctime)s %(levelname)-8s [%(name)s] [%(thread)d][%(filename)s:%(lineno)d] - %(message)s",
+                "format": "%(asctime)s %(levelname)-8s [%(name)s] - %(message)s",
                 "datefmt": "%Y-%m-%d %H:%M:%S",
             },
             "colored_console": {
                 "()": get_fullname(colorlog.ColoredFormatter),
-                "format": "%(asctime)s %(log_color)s%(levelname)-8s%(reset)s [%(name)s] [%(thread)d][%(filename)s:%(lineno)d] %(log_color)s%(message)s%(reset)s",
+                # "format": "%(asctime)s %(log_color)s%(levelname)-8s%(reset)s [%(name)s] [%(thread)d][%(filename)s:%(lineno)d] %(log_color)s%(message)s%(reset)s",
+                "format": "%(asctime)s %(log_color)s%(levelname)-8s%(reset)s [%(name)s] %(log_color)s%(message)s%(reset)s",
                 "datefmt": "%Y-%m-%d %H:%M:%S",
                 "log_colors": {
                     "DEBUG": "cyan",
@@ -129,7 +156,7 @@ def get_default_config(dirpath: str, logLevel: int) -> Dict:
             },
         },
         "root": {
-            "level": logging.getLevelName(logLevel),
+            "level": logging.getLevelName(logging.NOTSET),
             "handlers": using_root_handlers,
         },
     }
@@ -137,8 +164,8 @@ def get_default_config(dirpath: str, logLevel: int) -> Dict:
     return config
 
 
-def root_logger_setup(dirpath: str, logLevel: int):
-    config = get_default_config(dirpath, logLevel)
+def root_logger_setup(dirpath: str):
+    config = get_default_config(dirpath)
     logging.config.dictConfig(config)
 
 

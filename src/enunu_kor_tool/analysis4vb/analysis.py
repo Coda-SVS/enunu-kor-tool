@@ -31,17 +31,19 @@ def main():
 
         if os.path.isfile(args["config"]):
             config = utils.load_yaml(args["config"])
+            logger.debug("DB 내부의 Config를 읽었습니다.")
         else:
             config = DEFAULT_CONFIG
-            logger.warning(f"Config 파일이 존재하지 않습니다. Path=[{args['config']}]\n[{args['input']}] 내부에 Config 파일을 생성합니다.")
+            logger.warning(f"Config 파일이 존재하지 않습니다. Path=[{args['config']}]\n[{args['input']}] 내부에 기본값 Config 파일을 생성합니다.")
 
             with open(args["config"], "w", encoding="utf-8") as f:
                 f.write(DEFAULT_YAML_CONFIG)
     else:
         config = utils.load_yaml(args["config"])
+        logger.debug("성공적으로 Config를 읽었습니다.")
 
     db_path = args["input"]
-    db_temp_path = os.path.join(db_path, "temp")
+    db_temp_path = os.path.join(db_path, "temp")  # TODO: 임시파일 처리 로직 개선 가능
     db_name = os.path.basename(db_path)
 
     db_raw_ustx_files = glob(os.path.join(db_path, "**", "*.ustx"), recursive=True)
@@ -65,7 +67,7 @@ def main():
 
     db_info = DB_Info(db_path, db_name, db_temp_path, db_files, config)
 
-    analysis_runner(db_info, logger)
+    analysis_runner(db_info)
 
     # logger.info(db_info)
 
