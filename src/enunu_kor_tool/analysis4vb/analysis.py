@@ -79,6 +79,11 @@ def main():
 
     logger.info("Done.")
 
+    if db_info.config.options["graph_show"]:
+        from matplotlib import pyplot
+
+        pyplot.show()
+
     if os.path.exists(db_info.config.output.temp):
         shutil.rmtree(db_info.config.output.temp)
 

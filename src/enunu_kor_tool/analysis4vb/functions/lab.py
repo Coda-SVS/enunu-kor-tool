@@ -63,6 +63,8 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
         lab_global_line_count += lab_len
         logger.info(f"lab 파일을 로드했습니다. [총 라인 수: {line_num_formatter(lab_len)}] [길이: {round(length / 10000000, 1)}s ({length} 100ns)] [오류 라인 수: {error_line_count}]")
 
+        # TODO: 자음이 혼자 있을 경우 검출
+        # TODO: 1 Frame 보다 짧은 음소 검출
         logger.debug(f"오류 검사 중...")
         global_length = 0
         for idx, (start, end, phn) in enumerate(lab, 1):
@@ -141,7 +143,8 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         utils.matplotlib_init()
         from matplotlib import pyplot as plt
 
-        plt.figure(0, figsize=(16, 6), dpi=100)
+        plot_name = "phoneme_count_single"
+        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=100)
 
         single_phoneme_count_sorted_dict = dict(sorted(single_phoneme_count_dict.items(), key=lambda item: item[1], reverse=True))
         keys, values = list(single_phoneme_count_sorted_dict.keys()), list(single_phoneme_count_sorted_dict.values())
@@ -154,11 +157,12 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         plt.tight_layout()
 
         if is_save_graph:
-            plt.savefig(os.path.join(graph_path, "phoneme_count_single.jpg"), dpi=200)
+            plt.savefig(os.path.join(graph_path, f"{plot_name}.jpg"), dpi=200)
         if is_show_graph:
             plt.show(block=False)
 
-        plt.figure(1, dpi=100)
+        plot_name = "phoneme_count_group"
+        plt.figure(utils.get_plot_num(plot_name), dpi=100)
 
         keys, values = list(group_phoneme_count_dict.keys()), list(group_phoneme_count_dict.values())
         b1 = plt.bar(keys, values, width=0.7)
@@ -170,9 +174,9 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         plt.tight_layout()
 
         if is_save_graph:
-            plt.savefig(os.path.join(graph_path, "phoneme_count_group.jpg"), dpi=200)
+            plt.savefig(os.path.join(graph_path, f"{plot_name}.jpg"), dpi=200)
         if is_show_graph:
-            plt.show()
+            plt.show(block=False)
 
     db_info.stats["phoneme_count"] = phoneme_count_dict
     return phoneme_count_dict

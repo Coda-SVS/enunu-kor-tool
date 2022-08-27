@@ -41,6 +41,7 @@ def load_yaml(path: str) -> Any:
 
 
 IS_MATPLOTLIB_INIT = False
+PLOT_COUNT_DICT = {}
 
 
 def matplotlib_init():
@@ -52,3 +53,13 @@ def matplotlib_init():
         matplotlib.rcParams["font.family"] = "Malgun Gothic"
         matplotlib.rcParams["axes.unicode_minus"] = False
         IS_MATPLOTLIB_INIT = True
+
+
+def get_plot_num(plot_name: str) -> int:
+    global PLOT_COUNT_DICT
+
+    if plot_name in PLOT_COUNT_DICT:
+        return PLOT_COUNT_DICT[plot_name]
+    else:
+        count = PLOT_COUNT_DICT[plot_name] = len(PLOT_COUNT_DICT)
+        return count
