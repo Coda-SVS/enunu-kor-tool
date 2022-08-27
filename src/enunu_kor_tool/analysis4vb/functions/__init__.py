@@ -11,4 +11,5 @@ def join_module_name(func_name: str):
 FUNC_LIST = {
     "lab_error_check": {"module": join_module_name("lab"), "func": "lab_error_check"},
     "phoneme_count": {"module": join_module_name("lab"), "func": "phoneme_count"},
+    "phoneme_length": {"module": join_module_name("lab"), "func": "phoneme_length"},
 }

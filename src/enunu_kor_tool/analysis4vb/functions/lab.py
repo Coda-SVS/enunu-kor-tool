@@ -8,6 +8,10 @@ from enunu_kor_tool import log, utils
 from enunu_kor_tool.analysis4vb.model import DB_Info
 
 
+def __100ns2s(ns: int):
+    return ns / 10000000
+
+
 def __preprocess(func):
     def preprocess_wrapper(db_info: DB_Info, logger: logging.Logger):
         if "labs" not in db_info.cache:
@@ -61,7 +65,7 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
         length = lab[-1][1]
         lab_len = len(lab)
         lab_global_line_count += lab_len
-        logger.info(f"lab 파일을 로드했습니다. [총 라인 수: {line_num_formatter(lab_len)}] [길이: {round(length / 10000000, 1)}s ({length} 100ns)] [오류 라인 수: {error_line_count}]")
+        logger.info(f"lab 파일을 로드했습니다. [총 라인 수: {line_num_formatter(lab_len)}] [길이: {round(__100ns2s(length), 1)}s ({length} 100ns)] [오류 라인 수: {error_line_count}]")
 
         # TODO: 자음이 혼자 있을 경우 검출
         # TODO: 1 Frame 보다 짧은 음소 검출
@@ -151,7 +155,7 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         b1 = plt.bar(keys, values, width=0.7)
         plt.bar_label(b1)
 
-        plt.title("Phones Count Statistics (음소 개수 통계)")
+        plt.title("Phonemes Count Statistics (음소 개수 통계)")
         plt.xlabel("Phoneme (음소)")
         plt.ylabel("Count (개수)")
         plt.tight_layout()
@@ -165,10 +169,17 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         plt.figure(utils.get_plot_num(plot_name), dpi=100)
 
         keys, values = list(group_phoneme_count_dict.keys()), list(group_phoneme_count_dict.values())
+        total_length = sum(values)
+        total_length_except_silence = total_length - group_phoneme_count_dict["silence"]
+        keys.insert(0, "Total Length")
+        values.insert(0, total_length)
+        keys.insert(1, "Total length\nexcept silence")
+        values.insert(1, total_length_except_silence)
+
         b1 = plt.bar(keys, values, width=0.7)
         plt.bar_label(b1)
 
-        plt.title("Phones Count Statistics by Group (그룹별 음소 개수 통계)")
+        plt.title("Phonemes Count Statistics by Group (그룹별 음소 개수 통계)")
         plt.xlabel("Phoneme Group (음소 그룹)")
         plt.ylabel("Count (개수)")
         plt.tight_layout()
@@ -180,3 +191,98 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
 
     db_info.stats["phoneme_count"] = phoneme_count_dict
     return phoneme_count_dict
+
+
+@__preprocess
+def phoneme_length(db_info: DB_Info, logger: logging.Logger):
+    phonemes_config = db_info.config.phonemes
+    is_show_graph = db_info.config.options["graph_show"]
+    is_save_graph = db_info.config.options["graph_save"]
+    labs: Dict = db_info.cache["labs"]
+
+    group_phoneme_length_dict = {}
+    single_phoneme_length_dict = {}
+    phoneme_length_dict = {
+        "group": group_phoneme_length_dict,
+        "single": single_phoneme_length_dict,
+    }
+
+    def add_one(dic: Dict, name: str, length: int):
+        if name not in dic:
+            dic[name] = __100ns2s(length)
+        else:
+            dic[name] += __100ns2s(length)
+
+    for file, lab in (labs_tqdm := tqdm(labs.items(), leave=False)):
+        labs_tqdm.set_description(f"[{file}] Calculating...")
+
+        for start, end, phn in lab:
+            add_one(single_phoneme_length_dict, phn, end - start)
+
+            if phn in phonemes_config.consonant:
+                add_one(group_phoneme_length_dict, "consonant", end - start)
+            elif phn in phonemes_config.vowel:
+                add_one(group_phoneme_length_dict, "vowel", end - start)
+            elif phn in phonemes_config.silence:
+                add_one(group_phoneme_length_dict, "silence", end - start)
+            elif phn in phonemes_config.other:
+                add_one(group_phoneme_length_dict, "other", end - start)
+            else:
+                add_one(group_phoneme_length_dict, "error", end - start)
+
+    if is_show_graph or is_save_graph:
+        logger.debug("그래프 출력 중...")
+        graph_path = db_info.config.output.graph
+
+        utils.matplotlib_init()
+        from matplotlib import pyplot as plt
+        import matplotlib.ticker as mticker
+
+        plot_name = "phoneme_length_single"
+        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=100)
+
+        single_phoneme_length_sorted_dict = dict(sorted(single_phoneme_length_dict.items(), key=lambda item: item[1], reverse=True))
+        keys, values = list(single_phoneme_length_sorted_dict.keys()), list(single_phoneme_length_sorted_dict.values())
+        b1 = plt.bar(keys, values, width=0.7)
+        plt.bar_label(b1, fmt="%.1fs")
+
+        plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2fs"))
+
+        plt.title("Phonemes Length Statistics (음소 길이 통계)")
+        plt.xlabel("Phoneme (음소)")
+        plt.ylabel("Length (길이)")
+        plt.tight_layout()
+
+        if is_save_graph:
+            plt.savefig(os.path.join(graph_path, f"{plot_name}.jpg"), dpi=200)
+        if is_show_graph:
+            plt.show(block=False)
+
+        plot_name = "phoneme_length_group"
+        plt.figure(utils.get_plot_num(plot_name), dpi=100)
+
+        keys, values = list(group_phoneme_length_dict.keys()), list(group_phoneme_length_dict.values())
+        total_length = sum(values)
+        total_length_except_silence = total_length - group_phoneme_length_dict["silence"]
+        keys.insert(0, "Total Length")
+        values.insert(0, total_length)
+        keys.insert(1, "Total length\nexcept silence")
+        values.insert(1, total_length_except_silence)
+
+        b1 = plt.bar(keys, values, width=0.7)
+        plt.bar_label(b1, fmt="%.1fs")
+
+        plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2fs"))
+
+        plt.title("Phonemes Length Statistics by Group (그룹별 음소 길이 통계)")
+        plt.xlabel("Phoneme Group (음소 그룹)")
+        plt.ylabel("Length (길이)")
+        plt.tight_layout()
+
+        if is_save_graph:
+            plt.savefig(os.path.join(graph_path, f"{plot_name}.jpg"), dpi=200)
+        if is_show_graph:
+            plt.show(block=False)
+
+    db_info.stats["phoneme_length"] = phoneme_length_dict
+    return phoneme_length_dict
