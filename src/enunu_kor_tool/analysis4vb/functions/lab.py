@@ -178,9 +178,9 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         keys, values = list(group_phoneme_count_dict.keys()), list(group_phoneme_count_dict.values())
         total_length = sum(values)
         total_length_except_silence = total_length - group_phoneme_count_dict["silence"]
-        keys.insert(0, "Total Length")
+        keys.insert(0, "Total")
         values.insert(0, total_length)
-        keys.insert(1, "Total length\nexcept silence")
+        keys.insert(1, "Total\n(except silence)")
         values.insert(1, total_length_except_silence)
 
         b1 = plt.bar(keys, values, width=0.7)
@@ -288,9 +288,9 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
         keys, values = list(group_phoneme_length_dict.keys()), list(group_phoneme_length_dict.values())
         total_length = sum(values)
         total_length_except_silence = total_length - group_phoneme_length_dict["silence"]
-        keys.insert(0, "Total Length")
+        keys.insert(0, "Total")
         values.insert(0, total_length)
-        keys.insert(1, "Total length\nexcept silence")
+        keys.insert(1, "Total\n(except silence)")
         values.insert(1, total_length_except_silence)
 
         b1 = plt.bar(keys, values, width=0.7)
