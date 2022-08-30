@@ -10,18 +10,34 @@ from enunu_kor_tool.analysis4vb.model import DB_Info, DB_Files
 from enunu_kor_tool.analysis4vb.config import DEFAULT_CONFIG, DEFAULT_YAML_CONFIG
 
 
-def main():
-    import argparse
+def cli_ui_main():
+    import cli_ui
 
-    parser = argparse.ArgumentParser(description="ENUNU 데이터 셋의 통계를 생성합니다.")
+    print("* TIP: 파일이나 폴더의 경로를 입력할 때, 드래그 & 드롭으로 쉽게 입력할 수 있습니다.")
 
-    parser.add_argument("-p", dest="config", help="Config 파일 경로")
-    parser.add_argument("-i", dest="input", required=True, help="데이터 셋의 경로")
-    # parser.add_argument("-o", dest="output", required=True, help="출력 디렉토리 경로")
+    args = {}
 
-    args = vars(parser.parse_args())
+    args["config"] = cli_ui.ask_string("Config 파일의 경로를 입력해주세요 (생략 가능): ")
+    args["input"] = cli_ui.ask_string("DB 경로를 입력해주세요 (폴더만 가능): ")
+
+    main(args)
+
+
+def main(args=None):
+    if not isinstance(args, dict):
+        import argparse
+
+        parser = argparse.ArgumentParser(description="ENUNU 데이터 셋의 통계를 생성합니다.")
+
+        parser.add_argument("-p", dest="config", help="Config 파일 경로")
+        parser.add_argument("-i", dest="input", required=True, help="데이터 셋의 경로")
+        # parser.add_argument("-o", dest="output", required=True, help="출력 디렉토리 경로")
+
+        args = vars(parser.parse_args())
 
     args["input"] = args["input"].rstrip("\\")
+
+    assert os.path.isdir(args["input"]), "입력한 경로에서 DB를 찾을 수 없습니다."
 
     log.DIR_PATH = os.path.join(args["input"], "logs")
 

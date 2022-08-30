@@ -1,3 +1,6 @@
+dist/
+*.spec
+
 logs/
 test/
 dep_package/

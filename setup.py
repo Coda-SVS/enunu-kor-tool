@@ -45,7 +45,7 @@ total_required_packages = list(set(total_required_packages))
 
 setuptools.setup(
     name="enunu_kor_tool",
-    version="0.0.11",
+    version="0.1.0",
     author="cardroid",
     author_email="carbonsindh@gmail.com",
     description="enunu Korean language support script collection",
@@ -69,6 +69,7 @@ setuptools.setup(
             "ustx2lab=enunu_kor_tool.entry.ustx2lab:main",
             "lab2ntlab=enunu_kor_tool.entry.lab2ntlab:main",
             "analysis4vb=enunu_kor_tool.analysis4vb.analysis:main",
+            "exe_test=enunu_kor_tool.entry.exe_entry:main",
             "ust2lab4model=enunu_kor_tool.entry.ust2lab4model:main",
         ]
     },
