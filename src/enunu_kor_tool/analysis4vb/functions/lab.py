@@ -72,7 +72,7 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
         logger.debug(f"오류 검사 중...")
         global_length = 0
         for idx, (start, end, phn) in enumerate(lab, 1):
-            if phn not in db_info.config.phonemes.all:
+            if phn not in db_info.config.group.all:
                 logger.warning(f"[Line {line_num_formatter(idx)}] [{phn}] Config에 명시되지 않은 음소가 사용되었습니다. ({file})")
                 error_line_count += 1
             if start >= end:
@@ -100,12 +100,11 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
 def lab_error_check(db_info: DB_Info, logger: logging.Logger):
     # 이미 로딩 과정에서 검사가 이루어지므로, 이 함수는 더미 함수임.
     logger.info("검사 완료.")
-    pass
 
 
 @__preprocess
 def phoneme_count(db_info: DB_Info, logger: logging.Logger):
-    phonemes_config = db_info.config.phonemes
+    config_group = db_info.config.group
     is_show_graph = db_info.config.options["graph_show"]
     is_save_graph = db_info.config.options["graph_save"]
     labs: Dict = db_info.cache["labs"]
@@ -129,19 +128,19 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         for start, end, phn in lab:
             add_one(single_phoneme_count_dict, phn)
 
-            if phn in phonemes_config.consonant:
+            if phn in config_group.consonant:
                 add_one(group_phoneme_count_dict, "consonant")
-            elif phn in phonemes_config.vowel:
+            elif phn in config_group.vowel:
                 add_one(group_phoneme_count_dict, "vowel")
-            elif phn in phonemes_config.silence:
+            elif phn in config_group.silence:
                 add_one(group_phoneme_count_dict, "silence")
-            elif phn in phonemes_config.other:
+            elif phn in config_group.other:
                 add_one(group_phoneme_count_dict, "other")
             else:
                 add_one(group_phoneme_count_dict, "error")
 
     if is_show_graph or is_save_graph:
-        logger.debug("그래프 출력 중...")
+        logger.info("그래프 출력 중...")
         graph_path = db_info.config.output.graph
         graph_show_dpi = db_info.config.options["graph_show_dpi"]
 
@@ -202,7 +201,7 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
 
 @__preprocess
 def phoneme_length(db_info: DB_Info, logger: logging.Logger):
-    phonemes_config = db_info.config.phonemes
+    config_group = db_info.config.group
     is_show_graph = db_info.config.options["graph_show"]
     is_save_graph = db_info.config.options["graph_save"]
     labs: Dict = db_info.cache["labs"]
@@ -235,19 +234,19 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
             add_one(single_phoneme_length_dict, phn, end - start)
             add_one_list(single_phoneme_lengths_list, phn, end - start)
 
-            if phn in phonemes_config.consonant:
+            if phn in config_group.consonant:
                 add_one(group_phoneme_length_dict, "consonant", end - start)
-            elif phn in phonemes_config.vowel:
+            elif phn in config_group.vowel:
                 add_one(group_phoneme_length_dict, "vowel", end - start)
-            elif phn in phonemes_config.silence:
+            elif phn in config_group.silence:
                 add_one(group_phoneme_length_dict, "silence", end - start)
-            elif phn in phonemes_config.other:
+            elif phn in config_group.other:
                 add_one(group_phoneme_length_dict, "other", end - start)
             else:
                 add_one(group_phoneme_length_dict, "error", end - start)
 
     if is_show_graph or is_save_graph:
-        logger.debug("그래프 출력 중...")
+        logger.info("그래프 출력 중...")
         graph_path = db_info.config.output.graph
         graph_show_dpi = db_info.config.options["graph_show_dpi"]
 
@@ -316,7 +315,7 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
 
         single_phoneme_lengths_list_graph_data = {}
         for key in single_phoneme_lengths_list.keys():
-            if key not in phonemes_config.silence:
+            if key not in config_group.silence:
                 single_phoneme_lengths_list_graph_data[key] = single_phoneme_lengths_list[key]
 
         single_phoneme_length_sorted_dict = dict(sorted(single_phoneme_lengths_list_graph_data.items(), key=lambda item: sum(item[1]), reverse=True))

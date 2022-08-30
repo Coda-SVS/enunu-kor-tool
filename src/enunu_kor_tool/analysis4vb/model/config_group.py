@@ -3,9 +3,9 @@ from typing import Dict, List
 from enunu_kor_tool.abc import DictBase
 
 
-class DB_Config_Phonemes(DictBase):
-    def __init__(self, config_phonemes: Dict) -> None:
-        self._data = config_phonemes
+class DB_Config_Group(DictBase):
+    def __init__(self, config_group: Dict) -> None:
+        self._data = config_group
 
         all_phn_list = []
         all_phn_list.extend(self.silence)

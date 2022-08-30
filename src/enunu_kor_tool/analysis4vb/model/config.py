@@ -5,7 +5,7 @@ from mergedeep import merge
 from enunu_kor_tool.abc import DictBase
 from enunu_kor_tool.analysis4vb.config import DEFAULT_CONFIG
 from enunu_kor_tool.analysis4vb.model.config_output import DB_Config_Output
-from enunu_kor_tool.analysis4vb.model.config_phonemes import DB_Config_Phonemes
+from enunu_kor_tool.analysis4vb.model.config_group import DB_Config_Group
 
 
 class DB_Config(DictBase):
@@ -13,7 +13,7 @@ class DB_Config(DictBase):
         self._data.update(DEFAULT_CONFIG)
         merge(self._data, config)
 
-        self.__config_phonemes = DB_Config_Phonemes(config["phonemes"])
+        self.__config_group = DB_Config_Group(config["group"])
         self.__output_config = DB_Config_Output(db_path, config["output"])
 
     @property
@@ -25,8 +25,8 @@ class DB_Config(DictBase):
         return self._data["funcs"]
 
     @property
-    def phonemes(self):
-        return self.__config_phonemes
+    def group(self):
+        return self.__config_group
 
     @property
     def output(self):
