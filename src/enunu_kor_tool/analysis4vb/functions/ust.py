@@ -124,7 +124,7 @@ def pitch_note_count(db_info: DB_Info, logger: logging.Logger):
         # * # 피치 및 노트 개수 통계 그래프
         #####
         plot_name = "pitch_and_note_count_stats"
-        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=graph_show_dpi)
+        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 8), dpi=graph_show_dpi)
 
         plt_pitch_note_count_dict = {}
         for k, v in pitch_note_count_dict.items():
@@ -185,7 +185,7 @@ def pitch_note_length(db_info: DB_Info, logger: logging.Logger):
         # * # 피치 및 노트 길이 통계 그래프
         #####
         plot_name = "pitch_and_note_length_stats"
-        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=graph_show_dpi)
+        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 8), dpi=graph_show_dpi)
 
         plt_pitch_note_length_dict = {}
         for k, v in pitch_note_length_dict.items():

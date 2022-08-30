@@ -151,7 +151,7 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         # * # 단일 음소 개수 그래프
         #####
         plot_name = "phoneme_count_single"
-        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=graph_show_dpi)
+        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 8), dpi=graph_show_dpi)
 
         single_phoneme_count_sorted_dict = dict(sorted(single_phoneme_count_dict.items(), key=lambda item: item[1], reverse=True))
         keys, values = list(single_phoneme_count_sorted_dict.keys()), list(single_phoneme_count_sorted_dict.values())
@@ -259,7 +259,7 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
         # * # 단일 음소 길이 그래프
         #####
         plot_name = "phoneme_length_single"
-        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=graph_show_dpi)
+        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 8), dpi=graph_show_dpi)
 
         single_phoneme_length_sorted_dict = dict(sorted(single_phoneme_length_dict.items(), key=lambda item: item[1], reverse=True))
         keys, values = list(single_phoneme_length_sorted_dict.keys()), list(single_phoneme_length_sorted_dict.values())
@@ -311,7 +311,7 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
         # * # 단일 음소 길이 그래프 [Box plot]
         #####
         plot_name = "phoneme_length_single_box"
-        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 6), dpi=graph_show_dpi)
+        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 8), dpi=graph_show_dpi)
 
         single_phoneme_lengths_list_graph_data = {}
         for key in single_phoneme_lengths_list.keys():
