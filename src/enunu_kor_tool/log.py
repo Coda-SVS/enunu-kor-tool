@@ -10,6 +10,8 @@ from typing import Dict, Union, Callable
 import colorlog
 import tqdm
 
+from enunu_kor_tool import version
+
 
 def unhandled_exception_hook(exc_type, exc_value, exc_traceback):
     if issubclass(exc_type, KeyboardInterrupt):
@@ -59,7 +61,7 @@ def get_logger(name: Union[str, Callable], logLevel: Union[int, str] = logging.I
         module_path = path.split(os.sep)
         paths = []
         for path_name in reversed(module_path):
-            if path_name == "enunu_kor_tool":
+            if path_name == version.package_name:
                 break
             paths.append(path_name)
         paths.append(name.__name__)

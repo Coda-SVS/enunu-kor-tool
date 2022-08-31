@@ -143,19 +143,36 @@ def ustx2lab(table_filepath: str, input_filepath: str, output_dirpath: str):
         f.write("\n".join(lab) + "\n")
 
 
+def cli_ui_main():
+    import cli_ui
+
+    print("> 설명: 해당 모듈은 UTAU 프로젝트 파일에서 라벨을 자동 생성합니다.")
+    print("* TIP: 파일이나 폴더의 경로를 입력할 때, 드래그 & 드롭으로 쉽게 입력할 수 있습니다.")
+
+    args = {}
+
+    args["table"] = cli_ui.ask_string("table 파일 경로를 입력하세요.")
+    args["input"] = cli_ui.ask_string("단일 Ust 또는 Ustx 파일, 또는 해당 파일이 모여있는 폴더 경로를 입력하세요.")
+    args["output"] = cli_ui.ask_string("출력 폴더 경로를 입력하세요.")
+    args["notuse_timeline"] = cli_ui.ask_yes_no("lab 파일의 음소만 출력", default=False)
+    args["notuse_g2pk4utau"] = cli_ui.ask_yes_no("g2pk4utau 미사용", default=False)
+
+    main(args)
+
+
 def main(args=None):
     if not isinstance(args, dict):
         import argparse
 
         global USE_G2PK4UTAU, USE_TIMELINE
 
-        parser = argparse.ArgumentParser(description="UTAU 프로젝트 파일에서 라벨을 추론합니다.")
+        parser = argparse.ArgumentParser(description="UTAU 프로젝트 파일에서 라벨을 자동 생성합니다.")
 
         parser.add_argument("-d", dest="table", required=True, help="table 파일 경로")
-        parser.add_argument("-i", dest="input", required=True, help="단일 Ust 또는 Ustx 파일, 또는 해당 파일이 모여있는 디렉토리 경로")
-        parser.add_argument("-o", dest="output", required=True, help="출력 디렉토리 경로")
-        parser.add_argument("--no-time", dest="notuse_timeline", action="store_true", help="시간을 출력하지 않습니다.")
-        parser.add_argument("--no-g2p", dest="notuse_g2pk4utau", action="store_true", help="g2pk4utau를 사용하지 않습니다.")
+        parser.add_argument("-i", dest="input", required=True, help="단일 Ust 또는 Ustx 파일, 또는 해당 파일이 모여있는 폴더 경로")
+        parser.add_argument("-o", dest="output", required=True, help="출력 폴더 경로")
+        parser.add_argument("--no-time", dest="notuse_timeline", action="store_false", help="시간을 출력하지 않습니다.")
+        parser.add_argument("--no-g2p", dest="notuse_g2pk4utau", action="store_false", help="g2pk4utau를 사용하지 않습니다.")
 
         args = vars(parser.parse_args())
 

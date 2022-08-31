@@ -1,3 +1,4 @@
+pyBuild.bat
 dist/
 *.spec
 

@@ -4,6 +4,20 @@ from tqdm import tqdm
 from glob import glob
 
 
+def cli_ui_main():
+    import cli_ui
+
+    print("> 설명: 해당 모듈은 라벨 파일의 음소만 남기고, 시간은 지웁니다.")
+    print("* TIP: 파일이나 폴더의 경로를 입력할 때, 드래그 & 드롭으로 쉽게 입력할 수 있습니다.")
+
+    args = {}
+
+    args["input"] = cli_ui.ask_string("단일 lab 파일, 또는 해당 파일이 모여있는 폴더 경로를 입력해주세요.")
+    args["output"] = cli_ui.ask_string("출력 폴더 경로를 입력해주세요.")
+
+    main(args)
+
+
 def lab2ntlab(path: str, output_path: str):
     os.makedirs(output_path, exist_ok=True)
 
@@ -26,12 +40,15 @@ def main(args=None):
 
         parser = argparse.ArgumentParser(description="라벨 파일의 음소만 남기고, 시간은 지웁니다.")
 
-        parser.add_argument("-i", dest="input", required=True, help="단일 lab 파일, 또는 해당 파일이 모여있는 디렉토리 경로")
-        parser.add_argument("-o", dest="output", required=True, help="출력 디렉토리 경로")
+        parser.add_argument("-i", dest="input", required=True, help="단일 lab 파일, 또는 해당 파일이 모여있는 폴더 경로")
+        parser.add_argument("-o", dest="output", required=True, help="출력 폴더 경로")
 
         args = vars(parser.parse_args())
 
-    input_files = glob(os.path.join(args["input"], "*.lab"))
+    if os.path.isfile(args["input"]):
+        input_files = [args["input"]]
+    else:
+        input_files = glob(os.path.join(args["input"], "*.lab"))
 
     templist = []
     for file_fullname in input_files:

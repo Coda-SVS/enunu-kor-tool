@@ -162,6 +162,13 @@ class g2pk4utau(object):
         return "\n".join([t[0] for t in text_list]), phn_list, token_phn_list, word_phn_list
 
 
+def cli_ui_main():
+    print("> 설명: 해당 모듈은 한국어 자소를 음소로 변환합니다.")
+    print("* [Ctrl + C]로 종료할 수 있습니다.")
+
+    main()
+
+
 def main():
     converter = g2pk4utau()
 
