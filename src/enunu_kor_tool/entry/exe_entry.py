@@ -34,7 +34,7 @@ MODULE_DESC_LIST = {
 }
 
 
-def main():
+def cli_ui_main():
     global MODULE_LIST
 
     selected_module = cli_ui.ask_choice("사용할 모듈을 선택하세요.", choices=MODULE_LIST, func_desc=lambda m: MODULE_DESC_LIST[m])
@@ -46,5 +46,30 @@ def main():
     func()
 
 
+def main():
+    import os, sys
+
+    if len(sys.argv) > 1 and sys.argv[1] == "--gen":
+        batch_file = (
+            "@echo off\n"
+            "\n"
+            "setlocal\n"
+            "set TMP=Temp\n"
+            "set TEMP=Temp\n"
+            "set MECAB_KO_DIC_PATH=.\enunu_kor_tool\mecab\mecab-ko-dic -r .\enunu_kor_tool\mecab\mecabrc\n"
+            "enunu_kor_tool\enunu_kor_tool.exe\n"
+            "endlocal\n"
+            "\n"
+            "pause"
+        )
+
+        with open(os.path.join("dist", "Start.bat"), "w", encoding="utf-8") as f:
+            f.write(batch_file)
+
+        return
+
+    cli_ui_main()
+
+
 if __name__ == "__main__":
-    main()
+    cli_ui_main()

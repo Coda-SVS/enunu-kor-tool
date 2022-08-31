@@ -81,7 +81,7 @@ def ustnote2htsnote(ust_note_block: Tuple[up.ust.Note, up.ust.Note, up.ust.Note]
 
     ust_note_block[1].lyric = ust_note_block[1].lyric.replace("'", " ")
 
-    if is_lyric(ust_note_block[1], d_table):
+    if g2p_converter != None and is_lyric(ust_note_block[1], d_table):
         current_phn_idx = 1
 
         orginal_lyrics = ""

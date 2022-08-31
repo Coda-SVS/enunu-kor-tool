@@ -176,8 +176,8 @@ def main(args=None):
 
         args = vars(parser.parse_args())
 
-    USE_G2PK4UTAU = args["notuse_g2pk4utau"]
-    USE_TIMELINE = args["notuse_timeline"]
+    USE_G2PK4UTAU = not args["notuse_g2pk4utau"]
+    USE_TIMELINE = not args["notuse_timeline"]
 
     input_files = []
     if os.path.isfile(args["input"]):
