@@ -11,26 +11,26 @@ def join_module_name(func_name: str):
 
 
 MODULE_DICT = {
-    # "g2pk4utau": {"module": "enunu_kor_tool.g2pk4utau.g2pk4utau", "func": "cli_ui_main"},
-    # "ustx2lab": {"module": "enunu_kor_tool.entry.ustx2lab", "func": "cli_ui_main"},
-    # "lab2ntlab": {"module": "enunu_kor_tool.entry.lab2ntlab", "func": "cli_ui_main"},
     "analysis4vb": {"module": "enunu_kor_tool.analysis4vb.analysis", "func": "cli_ui_main"},
+    "g2pk4utau": {"module": "enunu_kor_tool.g2pk4utau.g2pk4utau", "func": "cli_ui_main"},
+    "ustx2lab": {"module": "enunu_kor_tool.entry.ustx2lab", "func": "cli_ui_main"},
+    "lab2ntlab": {"module": "enunu_kor_tool.entry.lab2ntlab", "func": "cli_ui_main"},
 }
 
 
 MODULE_LIST = [
-    # "g2pk4utau",
-    # "ustx2lab",
-    # "lab2ntlab",
     "analysis4vb",
+    "g2pk4utau",
+    "ustx2lab",
+    "lab2ntlab",
 ]
 
 
 MODULE_DESC_LIST = {
-    # "g2pk4utau",
-    # "ustx2lab",
-    # "lab2ntlab",
-    "analysis4vb": "analysis4vb (ENUNU 통계 모듈)",
+    "analysis4vb": "analysis4vb (ENUNU 통계)",
+    "g2pk4utau": "g2pk4utau (한국어 자소 -> 음소 변환기)",
+    "ustx2lab": "ustx2lab (ustx, ust -> lab 변환기)",
+    "lab2ntlab": "lab2ntlab (lab 시간 표시 제거)",
 }
 
 

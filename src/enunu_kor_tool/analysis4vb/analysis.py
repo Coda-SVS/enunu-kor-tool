@@ -13,12 +13,12 @@ from enunu_kor_tool.analysis4vb.config import DEFAULT_CONFIG, DEFAULT_YAML_CONFI
 def cli_ui_main():
     import cli_ui
 
+    print("> 설명: 해당 모듈은 ENUNU 데이터 베이스 통계를 볼 수 있습니다.")
     print("* TIP: 파일이나 폴더의 경로를 입력할 때, 드래그 & 드롭으로 쉽게 입력할 수 있습니다.")
 
     args = {}
 
-    args["config"] = cli_ui.ask_string("Config 파일의 경로를 입력해주세요 (생략 가능): ")
-    args["input"] = cli_ui.ask_string("DB 경로를 입력해주세요 (폴더만 가능): ")
+    args["input"] = cli_ui.ask_string("DB 폴더의 경로를 입력해주세요.")
 
     main(args)
 
@@ -29,9 +29,7 @@ def main(args=None):
 
         parser = argparse.ArgumentParser(description="ENUNU 데이터 셋의 통계를 생성합니다.")
 
-        parser.add_argument("-p", dest="config", help="Config 파일 경로")
         parser.add_argument("-i", dest="input", required=True, help="데이터 셋의 경로")
-        # parser.add_argument("-o", dest="output", required=True, help="출력 디렉토리 경로")
 
         args = vars(parser.parse_args())
 
@@ -39,30 +37,26 @@ def main(args=None):
 
     assert os.path.isdir(args["input"]), "입력한 경로에서 DB를 찾을 수 없습니다."
 
-    log.DIR_PATH = os.path.join(args["input"], "logs")
+    log.DIR_PATH = os.path.join(args["input"], "analysis", "logs")
+    config_path = os.path.join(args["input"], "analysis", "analysis_config.yaml")
 
     def get_root_module_logger():
         loglevel = options.get("log_level", "info") if (options := config.get("options")) != None else "info"
         return log.get_logger("analysis4vb", loglevel)
 
-    if not isinstance(args.get("config"), str) or not os.path.isfile(args["config"]):
-        args["config"] = os.path.join(args["input"], "analysis_config.yaml")
+    if not os.path.isfile(config_path):
+        config = DEFAULT_CONFIG
 
-        if os.path.isfile(args["config"]):
-            config = utils.load_yaml(args["config"])
-            logger = get_root_module_logger()
+        with open(config_path, "w", encoding="utf-8") as f:
+            f.write(DEFAULT_YAML_CONFIG)
 
-            logger.debug("DB 내부의 Config를 읽었습니다.")
-        else:
-            config = DEFAULT_CONFIG
+        logger = get_root_module_logger()
+        logger.warning(f"Config 파일이 존재하지 않습니다. (DB 내부에 기본 Config 파일을 생성합니다)\nPath=[{config_path}]")
 
-            with open(args["config"], "w", encoding="utf-8") as f:
-                f.write(DEFAULT_YAML_CONFIG)
-
-            logger = get_root_module_logger()
-            logger.warning(f"Config 파일이 존재하지 않습니다. Path=[{args['config']}]\n[{args['input']}] 내부에 기본값 Config 파일을 생성합니다.")
+        input("Config 파일을 DB에 맞게 수정하고, 엔터를 눌러주세요...")
+        config = utils.load_yaml(config_path)
     else:
-        config = utils.load_yaml(args["config"])
+        config = utils.load_yaml(config_path)
         logger = get_root_module_logger()
         logger.debug("성공적으로 Config를 읽었습니다.")
 

@@ -4,15 +4,15 @@ from enunu_kor_tool.analysis4vb.functions import FUNC_LIST
 
 DEFAULT_CONFIG = {
     "output": {
-        "stats": "%(db_path)s/stats",
-        "graph": "%(db_path)s/stats/graph",
-        "temp": "%(db_path)s/temp",
+        "stats": "%(db_path)s/analysis/stats",
+        "graph": "%(db_path)s/analysis/stats/graph",
+        "temp": "%(db_path)s/analysis/temp",
     },
     "options": {
         "log_level": "info",
         "encoding": "utf-8",
         "graph_save": True,
-        "graph_show": True,
+        "graph_show": False,
         "graph_darkmode": True,
         "graph_show_dpi": 100,
     },
@@ -27,26 +27,28 @@ DEFAULT_CONFIG = {
 
 
 def __config2yaml(config):
-    config_yaml = str(yaml.dump(config, indent=2, sort_keys=False, allow_unicode=True)).split("\n")
+    return str(yaml.dump(config, indent=2, sort_keys=False, allow_unicode=True))
 
-    result = []
-    count = 0
-    is_funcs = False
-    for line in config_yaml:
-        if is_funcs:
-            count += 1
-            if count > 1:
-                if line.strip().startswith("-"):
-                    line = "# " + line
-                else:
-                    is_funcs = False
-                    count -= 1
-        elif line == "funcs:":
-            is_funcs = True
+    # config_yaml = str(yaml.dump(config, indent=2, sort_keys=False, allow_unicode=True)).split("\n")
 
-        result.append(line)
+    # result = []
+    # count = 0
+    # is_funcs = False
+    # for line in config_yaml:
+    #     if is_funcs:
+    #         count += 1
+    #         if count > 1:
+    #             if line.strip().startswith("-"):
+    #                 line = "#" + line
+    #             else:
+    #                 is_funcs = False
+    #                 count -= 1
+    #     elif line == "funcs:":
+    #         is_funcs = True
 
-    return "\n".join(result)
+    #     result.append(line)
+
+    # return "\n".join(result)
 
 
 DEFAULT_YAML_CONFIG = __config2yaml(DEFAULT_CONFIG)
