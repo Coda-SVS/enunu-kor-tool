@@ -20,15 +20,16 @@ def lab2ntlab(path: str, output_path: str):
         f.write("\n".join(phn) + "\n")
 
 
-def main():
-    import argparse
+def main(args=None):
+    if not isinstance(args, dict):
+        import argparse
 
-    parser = argparse.ArgumentParser(description="라벨 파일의 음소만 남기고, 시간은 지웁니다.")
+        parser = argparse.ArgumentParser(description="라벨 파일의 음소만 남기고, 시간은 지웁니다.")
 
-    parser.add_argument("-i", dest="input", required=True, help="단일 lab 파일, 또는 해당 파일이 모여있는 디렉토리 경로")
-    parser.add_argument("-o", dest="output", required=True, help="출력 디렉토리 경로")
+        parser.add_argument("-i", dest="input", required=True, help="단일 lab 파일, 또는 해당 파일이 모여있는 디렉토리 경로")
+        parser.add_argument("-o", dest="output", required=True, help="출력 디렉토리 경로")
 
-    args = vars(parser.parse_args())
+        args = vars(parser.parse_args())
 
     input_files = glob(os.path.join(args["input"], "*.lab"))
 

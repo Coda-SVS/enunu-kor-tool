@@ -1,6 +1,15 @@
+dist/
+*.spec
+
+logs/
 test/
 dep_package/
 enunu_kor_tool_python/
+src/enunu_kor_tool/thirdparty/
+
+src/enunu_kor_tool/entry/ust2lab4model.py
+src/enunu_kor_tool/entry/enunu4tts.py
+src/enunu_kor_tool/entry/sil_calculate.py
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,visualstudiocode

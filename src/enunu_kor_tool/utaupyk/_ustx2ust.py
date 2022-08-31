@@ -66,16 +66,16 @@ class Ustx2Ust_Converter:
                 if position < current_pos:
                     ust.write(f"[#{str(idx).zfill(4)}]\n")
                     ust.write(f"Length={current_pos - position}\n")
-                    ust.write("Lyric=R\n")
                     ust.write("NoteNum=60\n")
+                    ust.write("Lyric=R\n")
                     ust.write("PreUtterance=\n")
 
                     idx += 1
 
                 ust.write(f"[#{str(idx).zfill(4)}]\n")
                 ust.write(f"Length={current_dur}\n")
-                ust.write(f"Lyric={note['lyric']}\n")
                 ust.write(f"NoteNum={note['tone']}\n")
+                ust.write(f"Lyric={note['lyric']}\n")
                 ust.write("PreUtterance=\n")
 
                 idx += 1
@@ -100,6 +100,8 @@ def ustx2ust(db_root, out_dir):
         os.makedirs(out_dir, exist_ok=True)
         print(f"Converting ustx files")
         for path in tqdm(target_files):
+            if os.path.basename(path).endswith("-autosave"):
+                continue
             converter = Ustx2Ust_Converter(path)
             name, ext = os.path.splitext(os.path.basename(path))
             converter.save_ust(os.path.join(out_dir, f"{name}.ust"))
