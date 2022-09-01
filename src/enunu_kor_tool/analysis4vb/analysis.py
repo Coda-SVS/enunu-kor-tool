@@ -3,6 +3,8 @@ import os
 import shutil
 from glob import glob
 
+from tqdm import tqdm
+
 from enunu_kor_tool import utils, log
 from enunu_kor_tool.analysis4vb.model.config import DB_Config
 from enunu_kor_tool.utaupyk._ustx2ust import Ustx2Ust_Converter
@@ -68,8 +70,10 @@ def main(args=None):
     db_raw_ustx_files = glob(os.path.join(db_path, "**", "*.ustx"), recursive=True)
 
     if len(db_raw_ustx_files) > 0:
+        logger.info("ustx -> ust 변환 중...")
         os.makedirs(db_config.output.temp, exist_ok=True)
-        for ustx_path in db_raw_ustx_files:
+        for ustx_path in (db_raw_ustx_files_tqdm := tqdm(db_raw_ustx_files)):
+            db_raw_ustx_files_tqdm.set_description(f"ustx -> ust Converting... [{os.path.relpath(ustx_path)}]")
             if (ustx_path_split := os.path.splitext(ustx_path))[1] == ".ustx":
                 converter = Ustx2Ust_Converter(ustx_path, encoding="utf-8")
                 converter.save_ust(os.path.join(db_config.output.temp, os.path.basename(ustx_path_split[0]) + ".ust"))
