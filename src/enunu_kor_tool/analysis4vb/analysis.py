@@ -81,8 +81,13 @@ def main(args=None):
         glob(os.path.join(db_path, "**", "*.wav"), recursive=True),
     )
 
-    if not (len(db_files.ustx) == len(db_files.ust) == len(db_files.lab) == len(db_files.wav)):
-        logger.warning(f"데이터의 개수가 일치하지 않습니다.\nustx=[{len(db_files.ustx)} 개]\nust=[{len(db_files.ust)} 개]\nlab=[{len(db_files.lab)} 개]\nwav=[{len(db_files.wav)} 개]")
+    ustx_file_count = len(db_files.ustx)
+    ust_file_count = len(db_files.ust) - ustx_file_count
+    lab_file_count = len(db_files.lab)
+    wav_file_count = len(db_files.wav)
+
+    if not (ustx_file_count == ust_file_count == lab_file_count == wav_file_count):
+        logger.warning(f"데이터의 개수가 일치하지 않습니다.\nustx=[{ustx_file_count} 개]\nust=[{ust_file_count} 개]\nlab=[{lab_file_count} 개]\nwav=[{wav_file_count} 개]")
 
     db_info = DB_Info(db_path, db_name, db_files, db_config)
 
