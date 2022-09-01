@@ -1,13 +1,16 @@
+from copy import deepcopy
 import os
 import shutil
 from glob import glob
+
+from tqdm import tqdm
 
 from enunu_kor_tool import utils, log
 from enunu_kor_tool.analysis4vb.model.config import DB_Config
 from enunu_kor_tool.utaupyk._ustx2ust import Ustx2Ust_Converter
 from enunu_kor_tool.analysis4vb.runner import analysis_runner
 from enunu_kor_tool.analysis4vb.model import DB_Info, DB_Files
-from enunu_kor_tool.analysis4vb.config import DEFAULT_CONFIG, DEFAULT_YAML_CONFIG
+from enunu_kor_tool.analysis4vb import config as config_module
 
 
 def cli_ui_main():
@@ -37,23 +40,23 @@ def main(args=None):
 
     assert os.path.isdir(args["input"]), "입력한 경로에서 DB를 찾을 수 없습니다."
 
-    log.DIR_PATH = os.path.join(args["input"], "analysis", "logs")
-    config_path = os.path.join(args["input"], "analysis", "analysis_config.yaml")
+    output_path = os.path.join(args["input"], "analysis")
+    log.DIR_PATH = os.path.join(output_path, "logs")
+    config_path = os.path.join(output_path, "analysis_config.yaml")
 
     def get_root_module_logger():
         loglevel = options.get("log_level", "info") if (options := config.get("options")) != None else "info"
         return log.get_logger("analysis4vb", loglevel)
 
     if not os.path.isfile(config_path):
-        config = DEFAULT_CONFIG
+        config = deepcopy(config_module.DEFAULT_CONFIG)
 
-        with open(config_path, "w", encoding="utf-8") as f:
-            f.write(DEFAULT_YAML_CONFIG)
+        config_module.save_default_config2yaml(config_path)
 
         logger = get_root_module_logger()
         logger.warning(f"Config 파일이 존재하지 않습니다. (DB 내부에 기본 Config 파일을 생성합니다)\nPath=[{config_path}]")
 
-        input("Config 파일을 DB에 맞게 수정하고, 엔터를 눌러주세요...")
+        input("Config 파일을 DB에 알맞게 수정 후, 엔터를 눌러주세요...")
         config = utils.load_yaml(config_path)
     else:
         config = utils.load_yaml(config_path)
@@ -67,8 +70,10 @@ def main(args=None):
     db_raw_ustx_files = glob(os.path.join(db_path, "**", "*.ustx"), recursive=True)
 
     if len(db_raw_ustx_files) > 0:
+        logger.info("ustx -> ust 변환 중...")
         os.makedirs(db_config.output.temp, exist_ok=True)
-        for ustx_path in db_raw_ustx_files:
+        for ustx_path in (db_raw_ustx_files_tqdm := tqdm(db_raw_ustx_files)):
+            db_raw_ustx_files_tqdm.set_description(f"ustx -> ust Converting... [{os.path.relpath(ustx_path)}]")
             if (ustx_path_split := os.path.splitext(ustx_path))[1] == ".ustx":
                 converter = Ustx2Ust_Converter(ustx_path, encoding="utf-8")
                 converter.save_ust(os.path.join(db_config.output.temp, os.path.basename(ustx_path_split[0]) + ".ust"))
@@ -80,8 +85,13 @@ def main(args=None):
         glob(os.path.join(db_path, "**", "*.wav"), recursive=True),
     )
 
-    if not (len(db_files.ustx) == len(db_files.ust) == len(db_files.lab) == len(db_files.wav)):
-        logger.warning(f"데이터의 개수가 일치하지 않습니다.\nustx=[{len(db_files.ustx)} 개]\nust=[{len(db_files.ust)} 개]\nlab=[{len(db_files.lab)} 개]\nwav=[{len(db_files.wav)} 개]")
+    ustx_file_count = len(db_files.ustx)
+    ust_file_count = len(db_files.ust) - ustx_file_count
+    lab_file_count = len(db_files.lab)
+    wav_file_count = len(db_files.wav)
+
+    if not (ustx_file_count == ust_file_count == lab_file_count == wav_file_count):
+        logger.warning(f"데이터의 개수가 일치하지 않습니다.\nustx=[{ustx_file_count} 개]\nust=[{ust_file_count} 개]\nlab=[{lab_file_count} 개]\nwav=[{wav_file_count} 개]")
 
     db_info = DB_Info(db_path, db_name, db_files, db_config)
 

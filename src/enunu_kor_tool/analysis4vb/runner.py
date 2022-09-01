@@ -13,7 +13,17 @@ def analysis_runner(db_info: DB_Info):
     log_level = db_info.config.options["log_level"]
     logger = log.get_logger("analysis_runner", log_level)
 
-    for func_name in (func_tqdm := tqdm(db_info.config.funcs, leave=False)):
+    check_funcs = []
+    funcs = []
+    for f in db_info.config.funcs:
+        f = f.lower()
+        if f.endswith("check"):
+            check_funcs.append(f)
+        else:
+            funcs.append(f)
+    funcs = check_funcs + funcs
+
+    for func_name in (func_tqdm := tqdm(funcs, leave=False)):
         func_info = FUNC_LIST.get(func_name)
         if func_info == None:
             logger.error("찾을 수 없는 기능을 건너뛰었습니다.")

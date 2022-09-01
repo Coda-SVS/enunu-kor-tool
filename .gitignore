@@ -1,6 +1,4 @@
 pyBuild.bat
-dist/
-*.spec
 
 logs/
 test/

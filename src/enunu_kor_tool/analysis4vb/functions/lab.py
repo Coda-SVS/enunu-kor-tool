@@ -9,7 +9,7 @@ from enunu_kor_tool.analysis4vb.model import DB_Info
 
 
 def __100ns2s(ns: int):
-    return ns / 10000000
+    return ns / (10**7)
 
 
 def __preprocess(func):
@@ -45,7 +45,7 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
     lab_global_error_line_count = 0
     for file in (file_tqdm := tqdm(phonemes_files, leave=False)):
         file_tqdm.set_description(f"Processing... [{file}]")
-        logger.info(f"[{file}] 파일 로드 중...")
+        logger.info(f"[{os.path.relpath(file)}] 파일 로드 중...")
 
         lab = []
 
@@ -65,7 +65,6 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
         length = lab[-1][1]
         lab_len = len(lab)
         lab_global_line_count += lab_len
-        logger.info(f"lab 파일을 로드했습니다. [총 라인 수: {line_num_formatter(lab_len)}] [길이: {round(__100ns2s(length), 1)}s ({length} 100ns)] [오류 라인 수: {error_line_count}]")
 
         # TODO: 자음이 혼자 있을 경우 검출
         # TODO: 1 Frame 보다 짧은 음소 검출
@@ -73,23 +72,25 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
         global_length = 0
         for idx, (start, end, phn) in enumerate(lab, 1):
             if phn not in db_info.config.group.all:
-                logger.warning(f"[Line {line_num_formatter(idx)}] [{phn}] Config에 명시되지 않은 음소가 사용되었습니다. ({file})")
+                logger.warning(f"[Line {line_num_formatter(idx)}] [{phn}] Config에 명시되지 않은 음소가 사용되었습니다.")
                 error_line_count += 1
             if start >= end:
-                logger.warning(f"[Line {line_num_formatter(idx)}] 종료시점이 시작지점보다 빠릅니다. ({file})")
+                logger.warning(f"[Line {line_num_formatter(idx)}] 종료시점이 시작지점보다 빠릅니다.")
                 error_line_count += 1
             if global_length != start:
-                logger.warning(f"[Line {line_num_formatter(idx)}] 시작시점이 이전 종료지점과 다릅니다. ({file})")
+                logger.warning(f"[Line {line_num_formatter(idx)}] 시작시점이 이전 종료지점과 다릅니다.")
                 error_line_count += 1
 
             global_length = end
 
         if error_line_count > 0:
-            logger.warning(f"총 [{line_num_formatter(error_line_count)}] 개의 오류가 발견되었습니다. ({file})")
+            logger.warning(f"총 [{line_num_formatter(error_line_count)}] 개의 오류가 발견되었습니다.\n({file})")
             error_flag = True
             lab_global_error_line_count += error_line_count
 
         labs[file] = lab
+        logger.info(f"lab 파일을 로드했습니다. [총 라인 수: {line_num_formatter(lab_len)}] [길이: {round(__100ns2s(length), 1)}s ({length} 100ns)] [오류 라인 수: {error_line_count}]")
+
     logger.info(f"모든 lab 파일을 로드했습니다. [lab 파일 수: {len(labs)}] [총 라인 수: {lab_global_line_count}] [오류 라인 수: {lab_global_error_line_count}]")
     db_info.cache["labs"] = labs
 

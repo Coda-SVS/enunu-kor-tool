@@ -7,6 +7,7 @@ from typing import Any
 def save_json(path: str, obj: Any, indent: int = 2):
     if not path.endswith(".json"):
         path = os.path.splitext(path)[0] + ".json"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(obj, f, indent=indent)
 
@@ -25,8 +26,9 @@ def load_json(path: str) -> Any:
 def save_yaml(path: str, obj: Any, indent: int = 2):
     if not path.endswith(".yaml"):
         path = os.path.splitext(path)[0] + ".yaml"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(obj, f, indent=indent, sort_keys=False, allow_unicode=True)
+        yaml.dump(obj, f, indent=indent, sort_keys=False, allow_unicode=True, default_flow_style=True)
 
 
 def load_yaml(path: str) -> Any:
