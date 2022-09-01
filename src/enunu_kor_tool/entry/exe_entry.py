@@ -1,3 +1,4 @@
+import shutil
 import cli_ui
 
 BASE_MODULE_NAME = "enunu_kor_tool.analysis4vb.functions"
@@ -63,8 +64,36 @@ def main():
             "pause"
         )
 
-        with open(os.path.join("dist", "Start.bat"), "w", encoding="utf-8") as f:
+        with open(os.path.join("dist", "enunu_kor_tool", "Start.bat"), "w", encoding="utf-8") as f:
             f.write(batch_file)
+
+        os.system(
+            (
+                "pyinstaller "
+                '--add-data="dep_package\mecab;mecab" '
+                '--add-data="enunu_kor_tool_python\Lib\site-packages\konlpy;konlpy" '
+                '--add-data="dep_package\g2pK\g2pk;g2pk" '
+                '--add-data="enunu_kor_tool_python\Lib\site-packages\jamo\data;jamo\data" '
+                '--hidden-import="konlpy" '
+                '--hidden-import="matplotlib" '
+                '--hidden-import="matplotlib.backends.backend_tkagg" '
+                '--hidden-import="enunu_kor_tool.analysis4vb" '
+                '--hidden-import="enunu_kor_tool.analysis4vb.functions.lab" '
+                '--hidden-import="enunu_kor_tool.analysis4vb.functions.ust" '
+                '--hidden-import="enunu_kor_tool.g2pk4utau.g2pk4utau" '
+                '--hidden-import="enunu_kor_tool.entry.ustx2lab" '
+                '--hidden-import="enunu_kor_tool.utaupyk._ustx2ust" '
+                '--hidden-import="enunu_kor_tool.utaupyk._ust2hts" '
+                '--hidden-import="enunu_kor_tool.entry.lab2ntlab" '
+                "--clean "
+                "--distpath dist\enunu_kor_tool "
+                '-n "enunu_kor_tool" '
+                "--noconfirm "
+                "src\enunu_kor_tool\entry\exe_entry.py"
+            )
+        )
+        shutil.rmtree("build")
+        os.remove("enunu_kor_tool.spec")
 
         return
 
