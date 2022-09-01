@@ -1,3 +1,5 @@
+import os
+from typing import Any, Dict
 import yaml
 
 from enunu_kor_tool.analysis4vb.functions import FUNC_LIST
@@ -26,29 +28,37 @@ DEFAULT_CONFIG = {
 }
 
 
-def __config2yaml(config):
-    return str(yaml.dump(config, indent=2, sort_keys=False, allow_unicode=True))
+def config2yaml(config: Dict[str, Any]):
+    default_options = {
+        "indent": 2,
+        "sort_keys": False,
+        "allow_unicode": True,
+    }
+    result = []
 
-    # config_yaml = str(yaml.dump(config, indent=2, sort_keys=False, allow_unicode=True)).split("\n")
+    for key in config.keys():
+        if key == "group":
+            result.append(yaml.dump({key: config[key]}, default_flow_style=None, **default_options))
+        else:
+            result.append(yaml.dump({key: config[key]}, **default_options))
 
-    # result = []
-    # count = 0
-    # is_funcs = False
-    # for line in config_yaml:
-    #     if is_funcs:
-    #         count += 1
-    #         if count > 1:
-    #             if line.strip().startswith("-"):
-    #                 line = "#" + line
-    #             else:
-    #                 is_funcs = False
-    #                 count -= 1
-    #     elif line == "funcs:":
-    #         is_funcs = True
-
-    #     result.append(line)
-
-    # return "\n".join(result)
+    return "".join(result)
 
 
-DEFAULT_YAML_CONFIG = __config2yaml(DEFAULT_CONFIG)
+def save_config2yaml(path: str, config: Dict[str, Any]):
+    if not path.endswith(".yaml"):
+        path = os.path.splitext(path)[0] + ".yaml"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(config2yaml(config))
+
+
+def save_default_config2yaml(path: str):
+    if not path.endswith(".yaml"):
+        path = os.path.splitext(path)[0] + ".yaml"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(DEFAULT_YAML_CONFIG)
+
+
+DEFAULT_YAML_CONFIG = config2yaml(DEFAULT_CONFIG)

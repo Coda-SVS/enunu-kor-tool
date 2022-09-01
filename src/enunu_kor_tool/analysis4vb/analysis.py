@@ -1,3 +1,4 @@
+from copy import deepcopy
 import os
 import shutil
 from glob import glob
@@ -7,7 +8,7 @@ from enunu_kor_tool.analysis4vb.model.config import DB_Config
 from enunu_kor_tool.utaupyk._ustx2ust import Ustx2Ust_Converter
 from enunu_kor_tool.analysis4vb.runner import analysis_runner
 from enunu_kor_tool.analysis4vb.model import DB_Info, DB_Files
-from enunu_kor_tool.analysis4vb.config import DEFAULT_CONFIG, DEFAULT_YAML_CONFIG
+from enunu_kor_tool.analysis4vb import config as config_module
 
 
 def cli_ui_main():
@@ -37,23 +38,23 @@ def main(args=None):
 
     assert os.path.isdir(args["input"]), "입력한 경로에서 DB를 찾을 수 없습니다."
 
-    log.DIR_PATH = os.path.join(args["input"], "analysis", "logs")
-    config_path = os.path.join(args["input"], "analysis", "analysis_config.yaml")
+    output_path = os.path.join(args["input"], "analysis")
+    log.DIR_PATH = os.path.join(output_path, "logs")
+    config_path = os.path.join(output_path, "analysis_config.yaml")
 
     def get_root_module_logger():
         loglevel = options.get("log_level", "info") if (options := config.get("options")) != None else "info"
         return log.get_logger("analysis4vb", loglevel)
 
     if not os.path.isfile(config_path):
-        config = DEFAULT_CONFIG
+        config = deepcopy(config_module.DEFAULT_CONFIG)
 
-        with open(config_path, "w", encoding="utf-8") as f:
-            f.write(DEFAULT_YAML_CONFIG)
+        config_module.save_default_config2yaml(config_path)
 
         logger = get_root_module_logger()
         logger.warning(f"Config 파일이 존재하지 않습니다. (DB 내부에 기본 Config 파일을 생성합니다)\nPath=[{config_path}]")
 
-        input("Config 파일을 DB에 맞게 수정하고, 엔터를 눌러주세요...")
+        input("Config 파일을 DB에 알맞게 수정 후, 엔터를 눌러주세요...")
         config = utils.load_yaml(config_path)
     else:
         config = utils.load_yaml(config_path)
