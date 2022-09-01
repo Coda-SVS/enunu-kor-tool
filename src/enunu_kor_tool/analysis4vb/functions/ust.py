@@ -36,7 +36,7 @@ def __ust_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
     ust_files = db_info.files.ust
     group_config = db_info.config.group
     encoding = db_info.config.options.get("encoding", "utf-8")
-    line_num_formatter = lambda ln: str(ln).rjust(5)
+    line_num_formatter = lambda ln: str(ln).rjust(4)
 
     error_flag = False
     usts = {}
@@ -48,7 +48,7 @@ def __ust_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
 
     for file in (file_tqdm := tqdm(ust_files, leave=False)):
         file_tqdm.set_description(f"Processing... [{file}]")
-        logger.info(f"[{file}] 파일 로드 중...")
+        logger.info(f"[{os.path.relpath(file)}] 파일 로드 중...")
 
         ust = up.ust.load(file, encoding=encoding)
 
@@ -72,7 +72,7 @@ def __ust_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
         logger.info(
             f"ust 파일을 로드했습니다. "
             f"[총 노트 수: {line_num_formatter(notes_len)} (무음 제외: {line_num_formatter(notes_voiced_len)})] "
-            f"[총 길이: {round(notes_length_sum, 3)} s (무음 제외: {round(notes_voiced_length_sum, 3)} s)]"
+            f"[총 길이: {round(notes_length_sum, 3)}s (무음 제외: {round(notes_voiced_length_sum, 3)}s)]"
         )
 
         usts[file] = ust
@@ -81,7 +81,7 @@ def __ust_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
         f"모든 ust 파일을 로드했습니다. "
         f"[ust 파일 수: {len(usts)}] "
         f"[총 노트 수: {line_num_formatter(global_notes_len)} (무음 제외: {line_num_formatter(global_notes_voiced_len)})] "
-        f"[총 길이: {round(global_notes_length_sum, 3)} s (무음 제외: {round(global_notes_voiced_length_sum, 3)} s)]"
+        f"[총 길이: {round(global_notes_length_sum, 3)}s (무음 제외: {round(global_notes_voiced_length_sum, 3)}s)]"
     )
     db_info.cache["usts"] = usts
 
