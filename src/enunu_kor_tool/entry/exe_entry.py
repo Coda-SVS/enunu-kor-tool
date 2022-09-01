@@ -47,13 +47,16 @@ def cli_ui_main():
     print("".center(40, "#"))
     print()
 
-    selected_module = cli_ui.ask_choice("사용할 모듈을 선택하세요.", choices=MODULE_LIST, func_desc=lambda m: MODULE_DESC_LIST[m])
+    while True:
+        selected_module = cli_ui.ask_choice("사용할 모듈을 선택하세요.", choices=MODULE_LIST, func_desc=lambda m: MODULE_DESC_LIST[m])
 
-    module_info = MODULE_DICT[selected_module]
-    module = __import__(module_info["module"], fromlist=[module_info["module"]])
-    func = getattr(module, module_info["func"])
+        module_info = MODULE_DICT[selected_module]
+        module = __import__(module_info["module"], fromlist=[module_info["module"]])
+        func = getattr(module, module_info["func"])
 
-    func()
+        func()
+
+        print()
 
 
 def main():
