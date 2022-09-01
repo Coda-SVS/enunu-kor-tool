@@ -36,7 +36,16 @@ MODULE_DESC_LIST = {
 
 
 def cli_ui_main():
+    from enunu_kor_tool import version
+
     global MODULE_LIST
+
+    print()
+    print("".center(40, "#"))
+    print(f" {version.package_name} ver.{version.version} ".center(40, " "))
+    print(f" Dev. Cardroid ".center(40, " "))
+    print("".center(40, "#"))
+    print()
 
     selected_module = cli_ui.ask_choice("사용할 모듈을 선택하세요.", choices=MODULE_LIST, func_desc=lambda m: MODULE_DESC_LIST[m])
 
