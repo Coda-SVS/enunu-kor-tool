@@ -1,6 +1,8 @@
 import shutil
 import cli_ui
 
+from enunu_kor_tool import lang
+
 BASE_MODULE_NAME = "enunu_kor_tool.analysis4vb.functions"
 
 
@@ -47,16 +49,24 @@ def cli_ui_main():
     print("".center(40, "#"))
     print()
 
-    while True:
-        selected_module = cli_ui.ask_choice("사용할 모듈을 선택하세요.", choices=MODULE_LIST, func_desc=lambda m: MODULE_DESC_LIST[m])
-
-        module_info = MODULE_DICT[selected_module]
-        module = __import__(module_info["module"], fromlist=[module_info["module"]])
-        func = getattr(module, module_info["func"])
-
-        func()
-
+    try:
+        lang.cli_ui_main()  # 언어 설정
         print()
+
+        while True:
+            selected_module = cli_ui.ask_choice("사용할 모듈을 선택하세요.", choices=MODULE_LIST, func_desc=lambda m: MODULE_DESC_LIST[m])
+
+            module_info = MODULE_DICT[selected_module]
+            module = __import__(module_info["module"], fromlist=[module_info["module"]])
+            func = getattr(module, module_info["func"])
+
+            func()
+
+            print()
+            print("종료는 [Ctrl + C]를 눌러주세요.")
+            print()
+    except KeyboardInterrupt:
+        print("Done.")
 
 
 def main():
@@ -69,6 +79,7 @@ def main():
             "setlocal\n"
             "set TMP=Temp\n"
             "set TEMP=Temp\n"
+            "set LANG_DIR_PATH=.\lang\n"
             "set MECAB_KO_DIC_PATH=.\enunu_kor_tool\mecab\mecab-ko-dic -r .\enunu_kor_tool\mecab\mecabrc\n"
             "enunu_kor_tool\enunu_kor_tool.exe\n"
             "endlocal\n"
@@ -113,4 +124,4 @@ def main():
 
 
 if __name__ == "__main__":
-    cli_ui_main()
+    main()

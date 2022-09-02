@@ -1,5 +1,4 @@
-pyBuild.bat
-
+lang/
 logs/
 test/
 dep_package/
