@@ -34,6 +34,10 @@ analysis4vb_required_packages = [
     "mergedeep==1.3.4",
 ]
 
+check4lab_required_packages = [
+    "watchdog==2.1.9",
+]
+
 total_required_packages = []
 total_required_packages += required_packages
 total_required_packages += g2p4utau_required_packages
@@ -41,6 +45,7 @@ total_required_packages += utaupyk_required_packages
 # total_required_packages += ustx2lab_required_packages
 # total_required_packages += ust2lab4model_required_packages
 total_required_packages += analysis4vb_required_packages
+total_required_packages += check4lab_required_packages
 
 total_required_packages = list(set(total_required_packages))
 
@@ -59,6 +64,7 @@ setuptools.setup(
         "utaupyk": g2p4utau_required_packages + utaupyk_required_packages,
         "ustx2lab": g2p4utau_required_packages + utaupyk_required_packages,  # + ustx2lab_required_packages,
         "analysis4vb": analysis4vb_required_packages,
+        "check4lab": check4lab_required_packages,
         # "ust2lab4model": ust2lab4model_required_packages,
     },
     package_dir={"": "src"},
@@ -70,6 +76,7 @@ setuptools.setup(
             "ustx2lab=enunu_kor_tool.entry.ustx2lab:main",
             "lab2ntlab=enunu_kor_tool.entry.lab2ntlab:main",
             "analysis4vb=enunu_kor_tool.analysis4vb.analysis:main",
+            "check4lab=enunu_kor_tool.entry.check4lab:main",
             "exe_entry=enunu_kor_tool.entry.exe_entry:main",
             # "ust2lab4model=enunu_kor_tool.entry.ust2lab4model:main",
         ]
