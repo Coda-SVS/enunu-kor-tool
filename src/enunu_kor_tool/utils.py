@@ -4,6 +4,10 @@ import yaml
 from typing import Any
 
 
+def is_not_null_str(s: str):
+    return s != None and s != "" and not s.isspace()
+
+
 def save_json(path: str, obj: Any, indent: int = 2):
     if not path.endswith(".json"):
         path = os.path.splitext(path)[0] + ".json"

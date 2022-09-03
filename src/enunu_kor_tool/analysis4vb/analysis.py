@@ -5,23 +5,27 @@ from glob import glob
 
 from tqdm import tqdm
 
-from enunu_kor_tool import utils, log
+from enunu_kor_tool import utils, log, lang
 from enunu_kor_tool.analysis4vb.model.config import DB_Config
 from enunu_kor_tool.utaupyk._ustx2ust import Ustx2Ust_Converter
 from enunu_kor_tool.analysis4vb.runner import analysis_runner
 from enunu_kor_tool.analysis4vb.model import DB_Info, DB_Files
 from enunu_kor_tool.analysis4vb import config as config_module
 
+L = lang.get_global_lang()
+
 
 def cli_ui_main():
     import cli_ui
 
-    print("> 설명: 해당 모듈은 ENUNU 데이터 베이스 통계를 볼 수 있습니다.")
-    print("* TIP: 파일이나 폴더의 경로를 입력할 때, 드래그 & 드롭으로 쉽게 입력할 수 있습니다.")
+    global L
+
+    print(L("> 설명: 해당 모듈은 ENUNU 데이터 베이스 통계를 볼 수 있습니다."))
+    print(L("* TIP: 파일이나 폴더의 경로를 입력할 때, 드래그 & 드롭으로 쉽게 입력할 수 있습니다."))
 
     args = {}
 
-    args["input"] = cli_ui.ask_string("DB 폴더의 경로를 입력해주세요.")
+    args["input"] = cli_ui.ask_string(L("DB 폴더의 경로를 입력해주세요."))
 
     main(args)
 
