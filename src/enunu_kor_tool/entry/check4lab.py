@@ -186,7 +186,7 @@ def cli_ui_main():
 
     args["table"] = cli_ui.ask_string(L("table 파일 경로를 입력하세요."))
     args["input"] = cli_ui.ask_string(L("DB 폴더의 경로를 입력하세요."))
-    args["use_g2pk4utau"] = cli_ui.ask_yes_no(L("g2pk4utau 사용여부"), default=True)
+    args["use_g2pk4utau"] = cli_ui.ask_yes_no(L("g2pk4utau 사용 여부"), default=True)
 
     main(args)
 

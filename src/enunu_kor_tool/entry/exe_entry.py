@@ -43,7 +43,7 @@ def cli_ui_main():
             "g2pk4utau": L("g2pk4utau (한국어 자소 -> 음소 변환기)"),
             "ustx2lab": L("ustx2lab (ustx, ust -> lab 변환기)"),
             "lab2ntlab": L("lab2ntlab (lab 시간 표시 제거)"),
-            "check4lab": L("check4lab (ustx, ust <-> lab 일치 여부를 검사 모듈)"),
+            "check4lab": L("check4lab (ustx, ust <-> lab 일치 여부 검사 모듈) (beta.)"),
         }
 
         while True:

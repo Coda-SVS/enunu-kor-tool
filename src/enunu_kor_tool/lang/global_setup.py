@@ -3,7 +3,8 @@ import os
 from copy import deepcopy
 from typing import Dict, List
 
-from .ko_lang import KO
+from .kor_lang import KOR_DICT
+from .jpn_lang import JPN_DICT
 
 # 해당 모듈은 독립적으로 동작해야하므로 코드 재사용을 줄였음 (순환참조 방지)
 
@@ -26,10 +27,10 @@ class Lang:
             msg = self._lang_dict.get(key)
 
         if not is_not_null_str(msg):
-            if key in KO:
+            if key in KOR_DICT:
                 msg = key
             else:
-                msg = KO.get(key, f"언어 테이블에 명시되어 있지 않은 메시지 입니다. Key={key}")
+                msg = KOR_DICT.get(key, f"언어 테이블에 명시되어 있지 않은 메시지 입니다. Key={key}")
 
         return msg.format(**kwargs)
 
@@ -54,7 +55,7 @@ def load_lang(lang_file_path: str):
     if not os.path.isfile(lang_file_path):
         return {}
 
-    result = deepcopy(KO)
+    result = deepcopy(KOR_DICT)
 
     lines: List[str] = []
     with open(lang_file_path, "r", encoding="utf-8") as f:
@@ -76,11 +77,11 @@ def load_lang(lang_file_path: str):
 
 
 def set_global_lang(lang_file_path: str = ""):
-    global KO, DEFAULT_LANG, CURRENT_LANG
+    global KOR_DICT, DEFAULT_LANG, CURRENT_LANG
 
     if not is_not_null_str(lang_file_path) or not os.path.isfile(lang_file_path):
-        print("언어 파일을 찾을 수 없습니다. 내장된 언어 사용됨: [ko]")
-        DEFAULT_LANG = KO
+        print("언어 파일을 찾을 수 없습니다. 내장된 언어 사용됨: [kor]")
+        DEFAULT_LANG = KOR_DICT
     else:
         DEFAULT_LANG = load_lang(lang_file_path)
 
@@ -122,8 +123,11 @@ if LANG_DIR_PATH == "" or LANG_DIR_PATH == None or LANG_DIR_PATH.isspace():
 if not os.path.isdir(LANG_DIR_PATH) or len(os.listdir(LANG_DIR_PATH)) == 0:
     os.makedirs(LANG_DIR_PATH, exist_ok=True)
 
-    save_lang(ko_path := os.path.join(LANG_DIR_PATH, "ko.lang"), KO)
-    AVAILABLE_LANG_DICT["ko"] = ko_path
+    save_lang(kor_path := os.path.join(LANG_DIR_PATH, "kor.lang"), KOR_DICT)
+    AVAILABLE_LANG_DICT["kor"] = kor_path
+
+    save_lang(jpn_path := os.path.join(LANG_DIR_PATH, "jpn.lang"), JPN_DICT)
+    AVAILABLE_LANG_DICT["jpn"] = jpn_path
 else:
     lang_files = glob(os.path.join(LANG_DIR_PATH, "*.lang"))
     for path in lang_files:
