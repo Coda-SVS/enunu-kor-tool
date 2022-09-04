@@ -177,9 +177,9 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         b1 = plt.bar(keys, values, width=0.7)
         plt.bar_label(b1)
 
-        plt.title(L("Phonemes Count Statistics (음소 개수 통계)"))
-        plt.xlabel(L("Phoneme (음소)"))
-        plt.ylabel(L("Count (개수)"))
+        plt.title(L("Phonemes Count Statistics"))
+        plt.xlabel(L("Phoneme"))
+        plt.ylabel(L("Count"))
         plt.tight_layout()
 
         if is_save_graph:
@@ -204,9 +204,9 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         b1 = plt.bar(keys, values, width=0.7)
         plt.bar_label(b1)
 
-        plt.title(L("Phonemes Count Statistics by Group (그룹별 음소 개수 통계)"))
-        plt.xlabel(L("Phoneme Group (음소 그룹)"))
-        plt.ylabel(L("Count (개수)"))
+        plt.title(L("Phonemes Count Statistics by Group"))
+        plt.xlabel(L("Phoneme Group"))
+        plt.ylabel(L("Count"))
         plt.tight_layout()
 
         if is_save_graph:
@@ -287,9 +287,9 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
 
         plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2fs"))
 
-        plt.title(L("Phonemes Length Statistics (음소 길이 통계)"))
-        plt.xlabel(L("Phoneme (음소)"))
-        plt.ylabel(L("Length (길이)"))
+        plt.title(L("Phonemes Length Statistics"))
+        plt.xlabel(L("Phoneme"))
+        plt.ylabel(L("Length"))
         plt.tight_layout()
 
         if is_save_graph:
@@ -316,9 +316,9 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
 
         plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2fs"))
 
-        plt.title(L("Phonemes Length Statistics by Group (그룹별 음소 길이 통계)"))
-        plt.xlabel(L("Phoneme Group (음소 그룹)"))
-        plt.ylabel(L("Length (길이)"))
+        plt.title(L("Phonemes Length Statistics by Group"))
+        plt.xlabel(L("Phoneme Group"))
+        plt.ylabel(L("Length"))
         plt.tight_layout()
 
         if is_save_graph:
@@ -349,9 +349,9 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
 
         plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2fs"))
 
-        plt.title(L("Phonemes Length Statistics (음소 길이 통계) [Box plot]"))
-        plt.xlabel(L("Phoneme (음소)"))
-        plt.ylabel(L("Length (길이)"))
+        plt.title(L("Phonemes Length Statistics [Box plot]"))
+        plt.xlabel(L("Phoneme"))
+        plt.ylabel(L("Length"))
         plt.tight_layout()
 
         if is_save_graph:
