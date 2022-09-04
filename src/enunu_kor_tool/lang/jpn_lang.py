@@ -64,24 +64,10 @@ JPN_DICT.update(
     "모든 lab 파일을 로드했습니다. [lab 파일 수: {labs_len}] [총 라인 수: {lab_global_line_count}] [오류 라인 수: {lab_global_error_line_count}]": "すべてのlabファイルをロードしました。 [labファイル数: {labs_len}] [総ライン数: {lab_global_line_count}] [エラーライン数: {lab_global_error_line_count}]",
     "검사 완료.": "検査完了。",
     "그래프 출력 중...": "グラフ出力中...",
-    "Phonemes Count Statistics (음소 개수 통계)": "Phonemes Count Statistics (音素数統計)",
-    "Phoneme (음소)": "Phoneme (音素)",
-    "Count (개수)": "Count (個数)",
-    "Phonemes Count Statistics by Group (그룹별 음소 개수 통계)": "Phonemes Count Statistics by Group (グループ別音素個数統計)",
-    "Phoneme Group (음소 그룹)": "Phoneme Group (音素グループ)",
-    "Phonemes Length Statistics (음소 길이 통계)": "Phonemes Length Statistics (音素長さ統計)",
-    "Length (길이)": "Length (長さ)",
-    "Phonemes Length Statistics by Group (그룹별 음소 길이 통계)": "Phonemes Length Statistics by Group (グループ別音素長さ統計)",
-    "Phonemes Length Statistics (음소 길이 통계) [Box plot]": "Phonemes Length Statistics (音素長さ統計) [Box plot]",
 
     "ust 파일을 로드하는 중 오류가 발견되었습니다. 이후 작업에 영향을 끼칠 수 있습니다.": "ustファイルをロード中にエラーが発見されました。 今後の作業に影響を及ぼす可能性があります。",
     "ust 파일을 로드했습니다. [총 노트 수: {notes_len} (무음 제외: {notes_voiced_len})] [총 길이: {round_notes_length_sum}s (무음 제외: {round_notes_voiced_length_sum}s)]": "ustファイルをロードしました。 [総ノート数: {notes_len} (無音除外: {notes_voiced_len})] [総長さ: {round_notes_length_sum}s (無音除外: {round_notes_voiced_length_sum}s)]",
     "모든 ust 파일을 로드했습니다. [ust 파일 수: {usts_len}] [총 노트 수: {global_notes_len} (무음 제외: {global_notes_voiced_len})] [총 길이: {global_notes_length_sum}s (무음 제외: {global_notes_voiced_length_sum}s)]": "すべてのustファイルをロードしました。 [ustファイル数: {usts_len}] [総ノート数: {global_notes_len} (無音除外: {global_notes_voiced_len})] [総長さ: {global_notes_length_sum}s (無音除外: {global_notes_voiced_length_sum}s)]",
-    "Pitch and Note Count Statistics (피치 및 노트 개수 통계)": "Pitch and Note Count Statistics (ピッチおよびノート数統計)",
-    "Pitch (피치)": "Pitch (ピッチ)",
-    "Note Count (노트 개수)": "Note Count (ノート数)",
-    "Pitch and Note Length Statistics (피치 및 노트 길이 통계)": "Pitch and Note Length Statistics (ピッチおよびノート長さ統計)",
-    "Note Length (노트 길이)": "Note Length (ノート長さ)",
     }
 )
 # fmt: on

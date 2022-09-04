@@ -150,9 +150,9 @@ def pitch_note_count(db_info: DB_Info, logger: logging.Logger):
 
         plt.xticks(keys, plt_x_tick_labels)
 
-        plt.title(L("Pitch and Note Count Statistics (피치 및 노트 개수 통계)"))
-        plt.xlabel(L("Pitch (피치)"))
-        plt.ylabel(L("Note Count (노트 개수)"))
+        plt.title(L("Pitch and Note Count Statistics"))
+        plt.xlabel(L("Pitch"))
+        plt.ylabel(L("Note Count"))
         plt.tight_layout()
 
         if is_save_graph:
@@ -213,9 +213,9 @@ def pitch_note_length(db_info: DB_Info, logger: logging.Logger):
 
         plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2fs"))
 
-        plt.title(L("Pitch and Note Length Statistics (피치 및 노트 길이 통계)"))
-        plt.xlabel(L("Pitch (피치)"))
-        plt.ylabel(L("Note Length (노트 길이)"))
+        plt.title(L("Pitch and Note Length Statistics"))
+        plt.xlabel(L("Pitch"))
+        plt.ylabel(L("Note Length"))
         plt.tight_layout()
 
         if is_save_graph:
