@@ -13,6 +13,7 @@ MODULE_DICT = {
 
 
 MODULE_LIST = [
+    "exit",
     "analysis4vb",
     "g2pk4utau",
     "ustx2lab",
@@ -39,6 +40,7 @@ def cli_ui_main():
         print()
 
         MODULE_DESC_LIST = {
+            "exit": "Exit the program.",
             "analysis4vb": L("analysis4vb (ENUNU 통계)"),
             "g2pk4utau": L("g2pk4utau (한국어 자소 -> 음소 변환기)"),
             "ustx2lab": L("ustx2lab (ustx, ust -> lab 변환기)"),
@@ -47,7 +49,10 @@ def cli_ui_main():
         }
 
         while True:
-            selected_module = cli_ui.ask_choice(L("사용할 모듈을 선택하세요."), choices=MODULE_LIST, func_desc=lambda m: MODULE_DESC_LIST[m])
+            selected_module = cli_ui.ask_choice(L("사용할 모듈을 선택하세요."), choices=MODULE_LIST, func_desc=lambda m: MODULE_DESC_LIST[m], sort=False)
+
+            if selected_module == "exit":
+                break
 
             module_info = MODULE_DICT[selected_module]
             module = __import__(module_info["module"], fromlist=[module_info["module"]])
@@ -55,8 +60,6 @@ def cli_ui_main():
 
             func()
 
-            print()
-            print("종료는 [Ctrl + C]를 눌러주세요.")
             print()
     except KeyboardInterrupt:
         print("Done.")
