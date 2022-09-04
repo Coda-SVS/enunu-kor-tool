@@ -4,8 +4,10 @@ from typing import Dict
 
 from tqdm import tqdm
 
-from enunu_kor_tool import log, utils
+from enunu_kor_tool import lang, log, utils
 from enunu_kor_tool.analysis4vb.model import DB_Info
+
+L = lang.get_global_lang()
 
 
 def __100ns2s(ns: int):
@@ -18,7 +20,7 @@ def __preprocess(func):
             lab_loader_logger = log.get_logger("lab_loader", db_info.config.options["log_level"])
             is_exist_error = __lab_loader(db_info, lab_loader_logger)
             if is_exist_error:
-                lab_loader_logger.warning("lab 파일을 로드하는 중 오류가 발견되었습니다. 이후 작업에 영향을 끼칠 수 있습니다.")
+                lab_loader_logger.warning(L("lab 파일을 로드하는 중 오류가 발견되었습니다. 이후 작업에 영향을 끼칠 수 있습니다."))
 
         return func(db_info, logger)
 
@@ -45,18 +47,18 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
     lab_global_error_line_count = 0
     for file in (file_tqdm := tqdm(phonemes_files, leave=False)):
         file_tqdm.set_description(f"Processing... [{file}]")
-        logger.info(f"[{os.path.relpath(file)}] 파일 로드 중...")
+        logger.info(L("[{filepath}] 파일 로드 중...", filepath=os.path.relpath(file)))
 
         lab = []
 
-        logger.debug(f"파싱 작업 중...")
+        logger.debug(L("파싱 작업 중..."))
         error_line_count = 0
         with open(file, "r", encoding=encoding) as f:
             for idx, line in enumerate(f.readlines(), 1):
                 line_pieces = list(filter(lambda p: p not in ["\n", ""] and not p.isspace(), line.split(" ")))
                 if len(line_pieces) <= 2:
                     p_line = line.replace("\n", "\\n")
-                    logger.warning(f'[Line {line_num_formatter(idx)}] 파싱할 수 없는 라인을 건너뛰었습니다. [Content: "{p_line}"]')
+                    logger.warning(L('[Line {line_num}] 파싱할 수 없는 라인을 건너뛰었습니다. [Content: "{p_line}"]', line_num=line_num_formatter(idx), p_line=p_line))
                     error_line_count += 1
                     continue
                 start, end, *phn = line_pieces
@@ -68,30 +70,46 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
 
         # TODO: 자음이 혼자 있을 경우 검출
         # TODO: 1 Frame 보다 짧은 음소 검출
+        # TODO: 'pau' 또는 'sil'로 종료되지 않을 경우 검출
         logger.debug(f"오류 검사 중...")
         global_length = 0
         for idx, (start, end, phn) in enumerate(lab, 1):
             if phn not in db_info.config.group.all:
-                logger.warning(f"[Line {line_num_formatter(idx)}] [{phn}] Config에 명시되지 않은 음소가 사용되었습니다.")
+                logger.warning(L("[Line {line_num}] [{phn}] Config에 명시되지 않은 음소가 사용되었습니다.", line_num=line_num_formatter(idx), phn=phn))
                 error_line_count += 1
             if start >= end:
-                logger.warning(f"[Line {line_num_formatter(idx)}] 종료시점이 시작지점보다 빠릅니다.")
+                logger.warning(L("[Line {line_num}] 종료 시점이 시작 지점보다 빠릅니다.", line_num=line_num_formatter(idx)))
                 error_line_count += 1
             if global_length != start:
-                logger.warning(f"[Line {line_num_formatter(idx)}] 시작시점이 이전 종료지점과 다릅니다.")
+                logger.warning(L("[Line {line_num}] 시작 시점이 이전 종료 지점과 다릅니다.", line_num=line_num_formatter(idx)))
                 error_line_count += 1
 
             global_length = end
 
         if error_line_count > 0:
-            logger.warning(f"총 [{line_num_formatter(error_line_count)}] 개의 오류가 발견되었습니다.\n({file})")
+            logger.warning(L("총 [{line_num}] 개의 오류가 발견되었습니다.\n({file})", line_num=line_num_formatter(error_line_count), file=file))
             error_flag = True
             lab_global_error_line_count += error_line_count
 
         labs[file] = lab
-        logger.info(f"lab 파일을 로드했습니다. [총 라인 수: {line_num_formatter(lab_len)}] [길이: {round(__100ns2s(length), 1)}s ({length} 100ns)] [오류 라인 수: {error_line_count}]")
+        logger.info(
+            L(
+                "lab 파일을 로드했습니다. [총 라인 수: {line_num}] [길이: {round_length}s ({length} 100ns)] [오류 라인 수: {error_line_count}]",
+                line_num=line_num_formatter(lab_len),
+                round_length=round(__100ns2s(length), 1),
+                length=length,
+                error_line_count=error_line_count,
+            )
+        )
 
-    logger.info(f"모든 lab 파일을 로드했습니다. [lab 파일 수: {len(labs)}] [총 라인 수: {lab_global_line_count}] [오류 라인 수: {lab_global_error_line_count}]")
+    logger.info(
+        L(
+            "모든 lab 파일을 로드했습니다. [lab 파일 수: {labs_len}] [총 라인 수: {lab_global_line_count}] [오류 라인 수: {lab_global_error_line_count}]",
+            labs_len=len(labs),
+            lab_global_line_count=lab_global_line_count,
+            lab_global_error_line_count=lab_global_error_line_count,
+        )
+    )
     db_info.cache["labs"] = labs
 
     return error_flag
@@ -100,7 +118,7 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
 @__preprocess
 def lab_error_check(db_info: DB_Info, logger: logging.Logger):
     # 이미 로딩 과정에서 검사가 이루어지므로, 이 함수는 더미 함수임.
-    logger.info("검사 완료.")
+    logger.info(L("검사 완료."))
 
 
 @__preprocess
@@ -141,7 +159,7 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
                 add_one(group_phoneme_count_dict, "error")
 
     if is_show_graph or is_save_graph:
-        logger.info("그래프 출력 중...")
+        logger.info(L("그래프 출력 중..."))
         graph_path = db_info.config.output.graph
         graph_show_dpi = db_info.config.options["graph_show_dpi"]
 
@@ -159,9 +177,9 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         b1 = plt.bar(keys, values, width=0.7)
         plt.bar_label(b1)
 
-        plt.title("Phonemes Count Statistics (음소 개수 통계)")
-        plt.xlabel("Phoneme (음소)")
-        plt.ylabel("Count (개수)")
+        plt.title(L("Phonemes Count Statistics (음소 개수 통계)"))
+        plt.xlabel(L("Phoneme (음소)"))
+        plt.ylabel(L("Count (개수)"))
         plt.tight_layout()
 
         if is_save_graph:
@@ -186,9 +204,9 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
         b1 = plt.bar(keys, values, width=0.7)
         plt.bar_label(b1)
 
-        plt.title("Phonemes Count Statistics by Group (그룹별 음소 개수 통계)")
-        plt.xlabel("Phoneme Group (음소 그룹)")
-        plt.ylabel("Count (개수)")
+        plt.title(L("Phonemes Count Statistics by Group (그룹별 음소 개수 통계)"))
+        plt.xlabel(L("Phoneme Group (음소 그룹)"))
+        plt.ylabel(L("Count (개수)"))
         plt.tight_layout()
 
         if is_save_graph:
@@ -247,7 +265,7 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
                 add_one(group_phoneme_length_dict, "error", end - start)
 
     if is_show_graph or is_save_graph:
-        logger.info("그래프 출력 중...")
+        logger.info(L("그래프 출력 중..."))
         graph_path = db_info.config.output.graph
         graph_show_dpi = db_info.config.options["graph_show_dpi"]
 
@@ -269,9 +287,9 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
 
         plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2fs"))
 
-        plt.title("Phonemes Length Statistics (음소 길이 통계)")
-        plt.xlabel("Phoneme (음소)")
-        plt.ylabel("Length (길이)")
+        plt.title(L("Phonemes Length Statistics (음소 길이 통계)"))
+        plt.xlabel(L("Phoneme (음소)"))
+        plt.ylabel(L("Length (길이)"))
         plt.tight_layout()
 
         if is_save_graph:
@@ -298,9 +316,9 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
 
         plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2fs"))
 
-        plt.title("Phonemes Length Statistics by Group (그룹별 음소 길이 통계)")
-        plt.xlabel("Phoneme Group (음소 그룹)")
-        plt.ylabel("Length (길이)")
+        plt.title(L("Phonemes Length Statistics by Group (그룹별 음소 길이 통계)"))
+        plt.xlabel(L("Phoneme Group (음소 그룹)"))
+        plt.ylabel(L("Length (길이)"))
         plt.tight_layout()
 
         if is_save_graph:
@@ -331,9 +349,9 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
 
         plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2fs"))
 
-        plt.title("Phonemes Length Statistics (음소 길이 통계) [Box plot]")
-        plt.xlabel("Phoneme (음소)")
-        plt.ylabel("Length (길이)")
+        plt.title(L("Phonemes Length Statistics (음소 길이 통계) [Box plot]"))
+        plt.xlabel(L("Phoneme (음소)"))
+        plt.ylabel(L("Length (길이)"))
         plt.tight_layout()
 
         if is_save_graph:

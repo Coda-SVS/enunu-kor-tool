@@ -161,12 +161,12 @@ def get_phn_dictionary(labeling_mode: bool = True):
         (r"(?<=[ㅏ-ㅣ]\s*)ㄹ(?=\s*[ㅏ-ㅣ])", r"r "),
     ]
 
-    if labeling_mode:
-        pre_regex_list.append((r"(?<=ㄱ)(\s*)ㅆ", r"\1K ss "))
-        pre_regex_list.append((r"(?<=ㅂ)(\s*)ㅆ", r"\1P ss "))
-    else:
-        pre_regex_list.append((r"(?<=ㄱ\s*)ㅆ", r"Kss "))
-        pre_regex_list.append((r"(?<=ㅂ\s*)ㅆ", r"Pss "))
+    # if labeling_mode:
+    #     pre_regex_list.append((r"(?<=ㄱ)(\s*)ㅆ", r"\1K ss "))
+    #     pre_regex_list.append((r"(?<=ㅂ)(\s*)ㅆ", r"\1P ss "))
+    # else:
+    #     pre_regex_list.append((r"(?<=ㄱ\s*)ㅆ", r"Kss "))
+    #     pre_regex_list.append((r"(?<=ㅂ\s*)ㅆ", r"Pss "))
 
     ########
     # 초성 #

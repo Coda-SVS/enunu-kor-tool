@@ -1,13 +1,15 @@
 import logging
 import os
-from typing import Dict, List
+from typing import Dict
 
 from tqdm import tqdm
 import utaupy as up
-from utaupy.ust import NOTENAME_TO_NOTENUM_DICT, notenum_as_abc
+from utaupy.ust import notenum_as_abc
 
-from enunu_kor_tool import log, utils
+from enunu_kor_tool import lang, log, utils
 from enunu_kor_tool.analysis4vb.model import DB_Info
+
+L = lang.get_global_lang()
 
 
 def __preprocess(func):
@@ -16,7 +18,7 @@ def __preprocess(func):
             ust_loader_logger = log.get_logger("ust_loader", db_info.config.options["log_level"])
             is_exist_error = __ust_loader(db_info, ust_loader_logger)
             if is_exist_error:
-                ust_loader_logger.warning("lab 파일을 로드하는 중 오류가 발견되었습니다. 이후 작업에 영향을 끼칠 수 있습니다.")
+                ust_loader_logger.warning(L("ust 파일을 로드하는 중 오류가 발견되었습니다. 이후 작업에 영향을 끼칠 수 있습니다."))
 
         return func(db_info, logger)
 
@@ -48,7 +50,7 @@ def __ust_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
 
     for file in (file_tqdm := tqdm(ust_files, leave=False)):
         file_tqdm.set_description(f"Processing... [{file}]")
-        logger.info(f"[{os.path.relpath(file)}] 파일 로드 중...")
+        logger.info(L("[{filepath}] 파일 로드 중...", filepath=os.path.relpath(file)))
 
         ust = up.ust.load(file, encoding=encoding)
 
@@ -70,18 +72,26 @@ def __ust_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
         global_notes_voiced_length_sum += notes_voiced_length_sum
 
         logger.info(
-            f"ust 파일을 로드했습니다. "
-            f"[총 노트 수: {line_num_formatter(notes_len)} (무음 제외: {line_num_formatter(notes_voiced_len)})] "
-            f"[총 길이: {round(notes_length_sum, 3)}s (무음 제외: {round(notes_voiced_length_sum, 3)}s)]"
+            L(
+                "ust 파일을 로드했습니다. [총 노트 수: {notes_len} (무음 제외: {notes_voiced_len})] [총 길이: {round_notes_length_sum}s (무음 제외: {round_notes_voiced_length_sum}s)]",
+                notes_len=line_num_formatter(notes_len),
+                notes_voiced_len=line_num_formatter(notes_voiced_len),
+                round_notes_length_sum=round(notes_length_sum, 3),
+                round_notes_voiced_length_sum=round(notes_voiced_length_sum, 3),
+            )
         )
 
         usts[file] = ust
     # logger.info(f"모든 ust 파일을 로드했습니다. [ust 파일 수: {len(usts)}] [총 노트 수: {ust_global_note_count}] [총 길이: {round(ust_global_notes_length_sum, 3)}s]")
     logger.info(
-        f"모든 ust 파일을 로드했습니다. "
-        f"[ust 파일 수: {len(usts)}] "
-        f"[총 노트 수: {line_num_formatter(global_notes_len)} (무음 제외: {line_num_formatter(global_notes_voiced_len)})] "
-        f"[총 길이: {round(global_notes_length_sum, 3)}s (무음 제외: {round(global_notes_voiced_length_sum, 3)}s)]"
+        L(
+            "모든 ust 파일을 로드했습니다. [ust 파일 수: {usts_len}] [총 노트 수: {global_notes_len} (무음 제외: {global_notes_voiced_len})] [총 길이: {global_notes_length_sum}s (무음 제외: {global_notes_voiced_length_sum}s)]",
+            usts_len=len(usts),
+            global_notes_len=line_num_formatter(global_notes_len),
+            global_notes_voiced_len=line_num_formatter(global_notes_voiced_len),
+            global_notes_length_sum=round(global_notes_length_sum, 3),
+            global_notes_voiced_length_sum=round(global_notes_voiced_length_sum, 3),
+        )
     )
     db_info.cache["usts"] = usts
 
@@ -91,7 +101,7 @@ def __ust_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
 @__preprocess
 def ust_error_check(db_info: DB_Info, logger: logging.Logger):
     # 이미 로딩 과정에서 검사가 이루어지므로, 이 함수는 더미 함수임.
-    logger.info("검사 완료.")
+    logger.info(L("검사 완료."))
 
 
 @__preprocess
@@ -113,7 +123,7 @@ def pitch_note_count(db_info: DB_Info, logger: logging.Logger):
                 pitch_note_count_dict[note.notenum] += 1
 
     if is_show_graph or is_save_graph:
-        logger.info("그래프 출력 중...")
+        logger.info(L("그래프 출력 중..."))
         graph_path = db_info.config.output.graph
         graph_show_dpi = db_info.config.options["graph_show_dpi"]
 
@@ -140,9 +150,9 @@ def pitch_note_count(db_info: DB_Info, logger: logging.Logger):
 
         plt.xticks(keys, plt_x_tick_labels)
 
-        plt.title("Pitch and Note Count Statistics (피치 및 노트 개수 통계)")
-        plt.xlabel("Pitch (피치)")
-        plt.ylabel("Note Count (노트 개수)")
+        plt.title(L("Pitch and Note Count Statistics (피치 및 노트 개수 통계)"))
+        plt.xlabel(L("Pitch (피치)"))
+        plt.ylabel(L("Note Count (노트 개수)"))
         plt.tight_layout()
 
         if is_save_graph:
@@ -173,7 +183,7 @@ def pitch_note_length(db_info: DB_Info, logger: logging.Logger):
                 pitch_note_length_dict[note.notenum] += note.length_ms / 1000
 
     if is_show_graph or is_save_graph:
-        logger.info("그래프 출력 중...")
+        logger.info(L("그래프 출력 중..."))
         graph_path = db_info.config.output.graph
         graph_show_dpi = db_info.config.options["graph_show_dpi"]
 
@@ -203,9 +213,9 @@ def pitch_note_length(db_info: DB_Info, logger: logging.Logger):
 
         plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2fs"))
 
-        plt.title("Pitch and Note Length Statistics (피치 및 노트 길이 통계)")
-        plt.xlabel("Pitch (피치)")
-        plt.ylabel("Note Length (노트 길이)")
+        plt.title(L("Pitch and Note Length Statistics (피치 및 노트 길이 통계)"))
+        plt.xlabel(L("Pitch (피치)"))
+        plt.ylabel(L("Note Length (노트 길이)"))
         plt.tight_layout()
 
         if is_save_graph:

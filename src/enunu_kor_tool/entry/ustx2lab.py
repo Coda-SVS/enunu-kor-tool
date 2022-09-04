@@ -9,9 +9,6 @@ from enunu_kor_tool import g2pk4utau
 from enunu_kor_tool.utaupyk._ustx2ust import Ustx2Ust_Converter
 from enunu_kor_tool.utaupyk._ust2hts import ustnote2htsnote
 
-USE_G2PK4UTAU = True
-USE_TIMELINE = True
-
 g2p_converter = None
 
 
@@ -112,8 +109,8 @@ def convert(filename: str, ust: utaupy.ust.Ust, d_table: dict, g2p_converter: Un
     return result
 
 
-def ustx2lab(table_filepath: str, input_filepath: str, output_dirpath: str):
-    global USE_G2PK4UTAU, USE_TIMELINE, g2p_converter
+def ustx2lab(table_filepath: str, input_filepath: str, output_dirpath: str, use_g2pk4utau: bool = False, use_timeline: bool = True):
+    global g2p_converter
 
     input_filepath, output_dirpath = os.path.realpath(input_filepath), os.path.realpath(output_dirpath)
 
@@ -123,7 +120,7 @@ def ustx2lab(table_filepath: str, input_filepath: str, output_dirpath: str):
         converter.save_ust(input_filepath)
 
     d_table = utaupy.table.load(table_filepath, encoding="utf-8")
-    if USE_G2PK4UTAU and g2p_converter == None:
+    if use_g2pk4utau and g2p_converter == None:
         g2p_converter = g2pk4utau.g2pk4utau()
 
     ust = utaupy.ust.load(input_filepath)
@@ -132,7 +129,7 @@ def ustx2lab(table_filepath: str, input_filepath: str, output_dirpath: str):
 
     for idx, line in enumerate(lab):
         start, end, phn = line
-        if USE_TIMELINE:
+        if use_timeline:
             lab[idx] = f"{start} {end} {phn}"
         else:
             lab[idx] = phn
@@ -164,8 +161,6 @@ def main(args=None):
     if not isinstance(args, dict):
         import argparse
 
-        global USE_G2PK4UTAU, USE_TIMELINE
-
         parser = argparse.ArgumentParser(description="UTAU 프로젝트 파일에서 라벨을 자동 생성합니다.")
 
         parser.add_argument("-d", dest="table", required=True, help="table 파일 경로")
@@ -176,8 +171,8 @@ def main(args=None):
 
         args = vars(parser.parse_args())
 
-    USE_G2PK4UTAU = not args["notuse_g2pk4utau"]
-    USE_TIMELINE = not args["notuse_timeline"]
+    use_g2pk4utau = args["notuse_g2pk4utau"]
+    use_timeline = args["notuse_timeline"]
 
     input_files = []
     if os.path.isfile(args["input"]):
@@ -197,7 +192,7 @@ def main(args=None):
 
     for input_filepath in (input_filepath_tqdm := tqdm(input_files)):
         input_filepath_tqdm.set_description(f"Processing... [{os.path.basename(input_filepath)}]")
-        ustx2lab(table_filepath=args["table"], input_filepath=input_filepath, output_dirpath=args["output"])
+        ustx2lab(table_filepath=args["table"], input_filepath=input_filepath, output_dirpath=args["output"], use_g2pk4utau=use_g2pk4utau, use_timeline=use_timeline)
 
     print("done.")
 

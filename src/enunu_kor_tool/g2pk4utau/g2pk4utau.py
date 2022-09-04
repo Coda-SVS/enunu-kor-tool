@@ -1,5 +1,7 @@
+from copy import deepcopy
 import re
 from collections import deque
+from unittest import result
 
 from jamo import h2j, j2hcj
 
@@ -28,11 +30,12 @@ def is_only_hangul(text):
 
 
 class g2pk4utau(object):
-    def __init__(self):
+    def __init__(self, use_cache: bool = True):
         self.g2p = None
         self.empty_str_remover = lambda text: not text.isspace()
         self.dictionary = get_phn_dictionary(False)
         self.dictionary_label_mode = get_phn_dictionary(True)
+        self.cache = {} if use_cache else None
 
     def __call__(
         self,
@@ -43,6 +46,11 @@ class g2pk4utau(object):
         labeling_mode: bool = True,
         verbose: VerboseMode = VerboseMode.NONE,
     ):
+        if self.cache != None and text in self.cache:
+            if verbose.is_flag(VerboseMode.PARAMETER) or verbose.is_flag(VerboseMode.INPUT):
+                print("> Use Cache Dict")
+            return deepcopy(self.cache[text])
+
         if not use_g2pK:
             print("The g2pk option is disabled. Conversion results may contain many errors.")
 
@@ -159,7 +167,12 @@ class g2pk4utau(object):
                 temp_output = "\033[1;32m,\033[0m ".join(phn_list)
                 print(f"> 1 Phoneme List: {temp_output}")
 
-        return "\n".join([t[0] for t in text_list]), phn_list, token_phn_list, word_phn_list
+        result = ("\n".join([t[0] for t in text_list]), phn_list, token_phn_list, word_phn_list)
+
+        if self.cache != None:
+            self.cache[text] = deepcopy(result)
+
+        return result
 
 
 def cli_ui_main():
