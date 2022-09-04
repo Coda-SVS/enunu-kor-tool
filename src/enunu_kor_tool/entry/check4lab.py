@@ -122,7 +122,7 @@ def compare_ust_lab(table_path: str, ust_ustx_path: str, lab_path: str, temp_pat
                         logger.error(L("라벨 파일에 불필요한 문자가 포함된 표현이 있습니다. LineNum=[{line}]", line=idx + 1))
                         is_error = True
                     elif align_phn not in silence_phn_list:
-                        logger.error(L("DB의 라벨파일과 악보에서 생성한 라벨파일의 길이가 다릅니다. filename=[{filename}]", filename=filename))
+                        logger.error(L("DB의 라벨 파일과 악보에서 생성한 라벨 파일의 길이가 다릅니다. filename=[{filename}]", filename=filename))
                         is_error = True
                         break
                 break
@@ -145,7 +145,7 @@ def compare_ust_lab(table_path: str, ust_ustx_path: str, lab_path: str, temp_pat
                         (
                             "라벨 파일에 오류가 있습니다.\n"
                             "DB 라벨 파일: LineNum=[{line}], Start=[{align_start}], End=[{align_end}], Phoneme=[{align_phn}]\n"
-                            "악보에서 생성된 라벨 파일: Start=[{score_start}], End=[{score_end}], Phoneme=[{score_phn}]"
+                            "UST(X)에서 생성된 라벨 파일: Start=[{score_start}], End=[{score_end}], Phoneme=[{score_phn}]"
                         ),
                         line=idx + 1,
                         align_start=align_start,
@@ -160,7 +160,7 @@ def compare_ust_lab(table_path: str, ust_ustx_path: str, lab_path: str, temp_pat
             if align_start >= align_end:
                 logger.error(
                     L(
-                        "라벨 파일에 시작 시간이 종료시간 보다 느린 음소가 있습니다.\nLineNum=[{line}], Start=[{align_start}], End=[{align_end}], Phoneme=[{align_phn}]",
+                        "라벨 파일에 시작 시간이 종료 시간 보다 느린 음소가 있습니다.\nLineNum=[{line}], Start=[{align_start}], End=[{align_end}], Phoneme=[{align_phn}]",
                         line=idx + 1,
                         align_start=align_start,
                         align_end=align_end,
@@ -169,11 +169,11 @@ def compare_ust_lab(table_path: str, ust_ustx_path: str, lab_path: str, temp_pat
                 )
                 is_error = True
     except:
-        logger.error(L("라벨파일을 점검하는 도중 파싱오류가 발생했습니다. LineNum=[{line}]", line=idx + 1))
+        logger.error(L("라벨 파일을 점검하는 도중 파싱 오류가 발생했습니다. LineNum=[{line}]", line=idx + 1))
         is_error = True
 
     if not is_error:
-        logger.info(L("라벨파일에서 오류를 발견하지 못했습니다."))
+        logger.info(L("라벨 파일에서 오류를 발견하지 못했습니다."))
 
 
 def cli_ui_main():

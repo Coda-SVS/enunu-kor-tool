@@ -63,6 +63,7 @@ def load_lang(lang_file_path: str):
 
     key = ""
     for idx, line in enumerate(lines):
+        line = line.replace("\\n", "\n")
         if line.startswith(">"):
             key = line[1:].strip()
         elif line.startswith("="):

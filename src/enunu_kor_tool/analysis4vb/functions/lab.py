@@ -70,6 +70,7 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
 
         # TODO: 자음이 혼자 있을 경우 검출
         # TODO: 1 Frame 보다 짧은 음소 검출
+        # TODO: 'pau' 또는 'sil'로 종료되지 않을 경우 검출
         logger.debug(f"오류 검사 중...")
         global_length = 0
         for idx, (start, end, phn) in enumerate(lab, 1):
@@ -77,16 +78,16 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
                 logger.warning(L("[Line {line_num}] [{phn}] Config에 명시되지 않은 음소가 사용되었습니다.", line_num=line_num_formatter(idx), phn=phn))
                 error_line_count += 1
             if start >= end:
-                logger.warning(L("[Line {line_num}] 종료시점이 시작지점보다 빠릅니다.", line_num=line_num_formatter(idx)))
+                logger.warning(L("[Line {line_num}] 종료 시점이 시작 지점보다 빠릅니다.", line_num=line_num_formatter(idx)))
                 error_line_count += 1
             if global_length != start:
-                logger.warning(L("[Line {line_num}] 시작시점이 이전 종료지점과 다릅니다.", line_num=line_num_formatter(idx)))
+                logger.warning(L("[Line {line_num}] 시작 시점이 이전 종료 지점과 다릅니다.", line_num=line_num_formatter(idx)))
                 error_line_count += 1
 
             global_length = end
 
         if error_line_count > 0:
-            logger.warning(L("총 [{line_num}] 개의 오류가 발견되었습니다.\n({file})", line_num=line_num_formatter(error_line_count)))
+            logger.warning(L("총 [{line_num}] 개의 오류가 발견되었습니다.\n({file})", line_num=line_num_formatter(error_line_count), file=file))
             error_flag = True
             lab_global_error_line_count += error_line_count
 

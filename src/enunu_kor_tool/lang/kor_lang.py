@@ -27,17 +27,17 @@ KOR_DICT = {
     (
         "라벨 파일에 오류가 있습니다.\n"
         "DB 라벨 파일: LineNum=[{line}], Start=[{align_start}], End=[{align_end}], Phoneme=[{align_phn}]\n"
-        "악보에서 생성된 라벨 파일: Start=[{score_start}], End=[{score_end}], Phoneme=[{score_phn}]"
+        "UST(X)에서 생성된 라벨 파일: Start=[{score_start}], End=[{score_end}], Phoneme=[{score_phn}]"
     ): "",
-    "라벨 파일에 시작 시간이 종료시간 보다 느린 음소가 있습니다.\nLineNum=[{line}], Start=[{align_start}], End=[{align_end}], Phoneme=[{align_phn}]": "",
-    "DB의 라벨파일과 악보에서 생성한 라벨파일의 길이가 다릅니다. filename=[{filename}]": "",
-    "라벨파일을 점검하는 도중 파싱오류가 발생했습니다. LineNum=[{line}]": "",
+    "라벨 파일에 시작 시간이 종료 시간 보다 느린 음소가 있습니다.\nLineNum=[{line}], Start=[{align_start}], End=[{align_end}], Phoneme=[{align_phn}]": "",
+    "DB의 라벨 파일과 악보에서 생성한 라벨 파일의 길이가 다릅니다. filename=[{filename}]": "",
+    "라벨 파일을 점검하는 도중 파싱 오류가 발생했습니다. LineNum=[{line}]": "",
     "라벨 파일에 불필요한 문자가 포함된 표현이 있습니다. LineNum=[{line}]": "",
-    "라벨파일에서 오류를 발견하지 못했습니다.": "",
+    "라벨 파일에서 오류를 발견하지 못했습니다.": "",
     "DB 감시를 시작했습니다.": "",
     "입력한 경로에서 DB를 찾을 수 없습니다.": "",
     "Config 파일이 존재하지 않습니다. (DB 내부에 기본 Config 파일을 생성합니다)\nPath=[{config_path}]": "",
-    "Config 파일을 DB에 알맞게 수정 후, 엔터를 눌러주세요...": "",
+    "Config 파일을 DB에 알맞게 수정 후, 엔터를 눌러주세요.": "",
     "성공적으로 Config를 읽었습니다.": "",
     "데이터의 개수가 일치하지 않습니다.\nustx=[{ustx_file_count} 개]\nust=[{ust_file_count} 개]\nlab=[{lab_file_count} 개]\nwav=[{wav_file_count} 개]": "",
     "ustx -> ust 변환 중...": "",
@@ -47,8 +47,8 @@ KOR_DICT = {
     "파싱 작업 중...": "",
     '[Line {line_num}] 파싱할 수 없는 라인을 건너뛰었습니다. [Content: "{p_line}"]': "",
     "[Line {line_num}] [{phn}] Config에 명시되지 않은 음소가 사용되었습니다.": "",
-    "[Line {line_num}] 종료시점이 시작지점보다 빠릅니다.": "",
-    "[Line {line_num}] 시작시점이 이전 종료지점과 다릅니다.": "",
+    "[Line {line_num}] 종료 시점이 시작 지점보다 빠릅니다.": "",
+    "[Line {line_num}] 시작 시점이 이전 종료 지점과 다릅니다.": "",
     "총 [{line_num}] 개의 오류가 발견되었습니다.\n({file})": "",
     "lab 파일을 로드했습니다. [총 라인 수: {line_num}] [길이: {round_length}s ({length} 100ns)] [오류 라인 수: {error_line_count}]": "",
     "모든 lab 파일을 로드했습니다. [lab 파일 수: {labs_len}] [총 라인 수: {lab_global_line_count}] [오류 라인 수: {lab_global_error_line_count}]": "",

@@ -60,7 +60,7 @@ def main(args=None):
         logger = get_root_module_logger()
         logger.warning(L("Config 파일이 존재하지 않습니다. (DB 내부에 기본 Config 파일을 생성합니다)\nPath=[{config_path}]", config_path=config_path))
 
-        input(L("Config 파일을 DB에 알맞게 수정 후, 엔터를 눌러주세요..."))
+        input(L("Config 파일을 DB에 알맞게 수정 후, 엔터를 눌러주세요."))
         config = utils.load_yaml(config_path)
     else:
         config = utils.load_yaml(config_path)
