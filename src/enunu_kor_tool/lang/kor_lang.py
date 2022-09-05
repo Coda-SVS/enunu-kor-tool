@@ -72,5 +72,9 @@ KOR_DICT = {
     "Note Count": "",
     "Pitch and Note Length Statistics": "",
     "Note Length": "",
+    
+    "Phonemes Average Length Statistics": "",
+    "Phonemes Average Length Statistics by Group": "",
+    "Phonemes Average Length Statistics (except silence)": "",
 }
 # fmt: on

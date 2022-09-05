@@ -119,6 +119,8 @@ def main(args=None):
     if os.path.exists(db_info.config.output.temp):
         shutil.rmtree(db_info.config.output.temp)
 
+    del config
+
     logger.info("Cleaned up.")
 
 

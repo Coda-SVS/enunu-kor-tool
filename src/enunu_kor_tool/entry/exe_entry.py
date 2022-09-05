@@ -13,7 +13,6 @@ MODULE_DICT = {
 
 
 MODULE_LIST = [
-    "exit",
     "analysis4vb",
     "g2pk4utau",
     "ustx2lab",
@@ -40,7 +39,6 @@ def cli_ui_main():
         print()
 
         MODULE_DESC_LIST = {
-            "exit": "Exit the program.",
             "analysis4vb": L("analysis4vb (ENUNU 통계)"),
             "g2pk4utau": L("g2pk4utau (한국어 자소 -> 음소 변환기)"),
             "ustx2lab": L("ustx2lab (ustx, ust -> lab 변환기)"),
@@ -48,19 +46,15 @@ def cli_ui_main():
             "check4lab": L("check4lab (ustx, ust <-> lab 일치 여부 검사 모듈) (beta.)"),
         }
 
-        while True:
-            selected_module = cli_ui.ask_choice(L("사용할 모듈을 선택하세요."), choices=MODULE_LIST, func_desc=lambda m: MODULE_DESC_LIST[m], sort=False)
+        selected_module = cli_ui.ask_choice(L("사용할 모듈을 선택하세요."), choices=MODULE_LIST, func_desc=lambda m: MODULE_DESC_LIST[m], sort=False)
 
-            if selected_module == "exit":
-                break
+        module_info = MODULE_DICT[selected_module]
+        module = __import__(module_info["module"], fromlist=[module_info["module"]])
+        func = getattr(module, module_info["func"])
 
-            module_info = MODULE_DICT[selected_module]
-            module = __import__(module_info["module"], fromlist=[module_info["module"]])
-            func = getattr(module, module_info["func"])
+        func()
 
-            func()
-
-            print()
+        print()
     except KeyboardInterrupt:
         print("Done.")
 
