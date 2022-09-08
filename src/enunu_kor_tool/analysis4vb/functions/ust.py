@@ -37,7 +37,8 @@ def __ust_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
 
     ust_files = db_info.files.ust
     group_config = db_info.config.group
-    encoding = db_info.config.options.get("encoding", "utf-8")
+    encoding = db_info.config.options.get("ust_encoding", "cp932")
+    print(encoding)
     line_num_formatter = lambda ln: str(ln).rjust(4)
 
     error_flag = False
@@ -50,7 +51,7 @@ def __ust_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
 
     for file in (file_tqdm := tqdm(ust_files, leave=False)):
         file_tqdm.set_description(f"Processing... [{file}]")
-        logger.info(L("[{filepath}] 파일 로드 중...", filepath=os.path.relpath(file)))
+        logger.info(L("[{filepath}] 파일 로드 중...", filepath=file))
 
         ust = up.ust.load(file, encoding=encoding)
 
@@ -93,7 +94,9 @@ def __ust_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
             global_notes_voiced_length_sum=round(global_notes_voiced_length_sum, 3),
         )
     )
-    db_info.cache["usts"] = usts
+
+    if usts != None and len(usts) > 0:
+        db_info.cache["usts"] = usts
 
     return error_flag
 
@@ -106,6 +109,10 @@ def ust_error_check(db_info: DB_Info, logger: logging.Logger):
 
 @__preprocess
 def pitch_note_count(db_info: DB_Info, logger: logging.Logger):
+    if "usts" not in db_info.cache:
+        logger.error(L("로드된 Ust, Ustx 파일을 찾을 수 없습니다."))
+        return
+
     config_group = db_info.config.group
     is_show_graph = db_info.config.options["graph_show"]
     is_save_graph = db_info.config.options["graph_save"]
@@ -166,6 +173,10 @@ def pitch_note_count(db_info: DB_Info, logger: logging.Logger):
 
 @__preprocess
 def pitch_note_length(db_info: DB_Info, logger: logging.Logger):
+    if "usts" not in db_info.cache:
+        logger.error(L("로드된 Ust, Ustx 파일을 찾을 수 없습니다."))
+        return
+
     config_group = db_info.config.group
     is_show_graph = db_info.config.options["graph_show"]
     is_save_graph = db_info.config.options["graph_save"]

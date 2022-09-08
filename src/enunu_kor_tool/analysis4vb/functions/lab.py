@@ -39,7 +39,7 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
 
     phonemes_files = db_info.files.lab
     use_100ns = db_info.config.options.get("use_100ns", False)
-    encoding = db_info.config.options.get("encoding", "utf-8")
+    encoding = db_info.config.options.get("lab_encoding", "utf-8")
     line_num_formatter = lambda ln: str(ln).rjust(4)
 
     error_flag = False
@@ -48,7 +48,7 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
     lab_global_error_line_count = 0
     for file in (file_tqdm := tqdm(phonemes_files, leave=False)):
         file_tqdm.set_description(f"Processing... [{file}]")
-        logger.info(L("[{filepath}] 파일 로드 중...", filepath=os.path.relpath(file)))
+        logger.info(L("[{filepath}] 파일 로드 중...", filepath=file))
 
         lab = []
 
@@ -111,7 +111,9 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
             lab_global_error_line_count=lab_global_error_line_count,
         )
     )
-    db_info.cache["labs"] = labs
+
+    if labs != None and len(labs) > 0:
+        db_info.cache["labs"] = labs
 
     return error_flag
 
@@ -124,6 +126,10 @@ def lab_error_check(db_info: DB_Info, logger: logging.Logger):
 
 @__preprocess
 def phoneme_count(db_info: DB_Info, logger: logging.Logger, quiet_mode: bool = False):
+    if "labs" not in db_info.cache:
+        logger.error(L("로드된 Lab 파일을 찾을 수 없습니다."))
+        return
+
     config_group = db_info.config.group
     is_show_graph = db_info.config.options["graph_show"]
     is_save_graph = db_info.config.options["graph_save"]
@@ -221,6 +227,10 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger, quiet_mode: bool = F
 
 @__preprocess
 def phoneme_length(db_info: DB_Info, logger: logging.Logger, quiet_mode: bool = False):
+    if "labs" not in db_info.cache:
+        logger.error(L("로드된 Lab 파일을 찾을 수 없습니다."))
+        return
+
     config_group = db_info.config.group
     use_100ns = db_info.config.options.get("use_100ns", False)
     is_show_graph = db_info.config.options["graph_show"]
@@ -368,6 +378,10 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger, quiet_mode: bool = 
 
 @__preprocess
 def phoneme_average_length(db_info: DB_Info, logger: logging.Logger, quiet_mode: bool = False):
+    if "labs" not in db_info.cache:
+        logger.error(L("로드된 Lab 파일을 찾을 수 없습니다."))
+        return
+
     is_show_graph = db_info.config.options["graph_show"]
     is_save_graph = db_info.config.options["graph_save"]
 
