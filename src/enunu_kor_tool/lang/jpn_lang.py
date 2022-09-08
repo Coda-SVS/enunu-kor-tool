@@ -52,6 +52,7 @@ JPN_DICT.update(
     "데이터의 개수가 일치하지 않습니다.\nustx=[{ustx_file_count} 개]\nust=[{ust_file_count} 개]\nlab=[{lab_file_count} 개]\nwav=[{wav_file_count} 개]": "データの個数が一致しません。\nustx=[{ustx_file_count} 個]\nust=[{ust_file_count} 個]\nlab=[{lab_file_count} 個]\nwav=[{wav_file_count} 個]",
     "ustx -> ust 변환 중...": "ustx -> ust 変換中...",
     
+    "로드된 Lab 파일을 찾을 수 없습니다.": "ロードされた Lab ファイルが見つかりません。",
     "lab 파일을 로드하는 중 오류가 발견되었습니다. 이후 작업에 영향을 끼칠 수 있습니다.": "labファイルをロード中にエラーが発見されました。 今後の作業に影響を及ぼす可能性があります。",
     "[{filepath}] 파일 로드 중...": "[{filepath}] ファイルロード中...",
     "파싱 작업 중...": "パーシング作業中...",
@@ -65,6 +66,7 @@ JPN_DICT.update(
     "검사 완료.": "検査完了。",
     "그래프 출력 중...": "グラフ出力中...",
 
+    "로드된 Ust, Ustx 파일을 찾을 수 없습니다.": "ロードされた Ust, Ustx ファイルが見つかりません。",
     "ust 파일을 로드하는 중 오류가 발견되었습니다. 이후 작업에 영향을 끼칠 수 있습니다.": "ustファイルをロード中にエラーが発見されました。 今後の作業に影響を及ぼす可能性があります。",
     "ust 파일을 로드했습니다. [총 노트 수: {notes_len} (무음 제외: {notes_voiced_len})] [총 길이: {round_notes_length_sum}s (무음 제외: {round_notes_voiced_length_sum}s)]": "ustファイルをロードしました。 [総ノート数: {notes_len} (無音除外: {notes_voiced_len})] [総長さ: {round_notes_length_sum}s (無音除外: {round_notes_voiced_length_sum}s)]",
     "모든 ust 파일을 로드했습니다. [ust 파일 수: {usts_len}] [총 노트 수: {global_notes_len} (무음 제외: {global_notes_voiced_len})] [총 길이: {global_notes_length_sum}s (무음 제외: {global_notes_voiced_length_sum}s)]": "すべてのustファイルをロードしました。 [ustファイル数: {usts_len}] [総ノート数: {global_notes_len} (無音除外: {global_notes_voiced_len})] [総長さ: {global_notes_length_sum}s (無音除外: {global_notes_voiced_length_sum}s)]",

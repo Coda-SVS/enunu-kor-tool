@@ -42,6 +42,7 @@ KOR_DICT = {
     "데이터의 개수가 일치하지 않습니다.\nustx=[{ustx_file_count} 개]\nust=[{ust_file_count} 개]\nlab=[{lab_file_count} 개]\nwav=[{wav_file_count} 개]": "",
     "ustx -> ust 변환 중...": "",
     
+    "로드된 Lab 파일을 찾을 수 없습니다.": "",
     "lab 파일을 로드하는 중 오류가 발견되었습니다. 이후 작업에 영향을 끼칠 수 있습니다.": "",
     "[{filepath}] 파일 로드 중...": "",
     "파싱 작업 중...": "",
@@ -64,6 +65,7 @@ KOR_DICT = {
     "Phonemes Length Statistics by Group": "",
     "Phonemes Length Statistics [Box plot]": "",
 
+    "로드된 Ust, Ustx 파일을 찾을 수 없습니다.": "",
     "ust 파일을 로드하는 중 오류가 발견되었습니다. 이후 작업에 영향을 끼칠 수 있습니다.": "",
     "ust 파일을 로드했습니다. [총 노트 수: {notes_len} (무음 제외: {notes_voiced_len})] [총 길이: {round_notes_length_sum}s (무음 제외: {round_notes_voiced_length_sum}s)]": "",
     "모든 ust 파일을 로드했습니다. [ust 파일 수: {usts_len}] [총 노트 수: {global_notes_len} (무음 제외: {global_notes_voiced_len})] [총 길이: {global_notes_length_sum}s (무음 제외: {global_notes_voiced_length_sum}s)]": "",
