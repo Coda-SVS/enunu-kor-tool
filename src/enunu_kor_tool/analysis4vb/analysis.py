@@ -77,7 +77,7 @@ def main(args=None):
         logger.info(L("ustx -> ust 변환 중..."))
         os.makedirs(db_config.output.temp, exist_ok=True)
         for ustx_path in (db_raw_ustx_files_tqdm := tqdm(db_raw_ustx_files)):
-            db_raw_ustx_files_tqdm.set_description(f"ustx -> ust Converting... [{os.path.relpath(ustx_path)}]")
+            db_raw_ustx_files_tqdm.set_description(f"ustx -> ust Converting... [{ustx_path}]")
             if (ustx_path_split := os.path.splitext(ustx_path))[1] == ".ustx":
                 converter = Ustx2Ust_Converter(ustx_path, encoding="utf-8")
                 converter.save_ust(os.path.join(db_config.output.temp, os.path.basename(ustx_path_split[0]) + ".ust"))
@@ -118,6 +118,8 @@ def main(args=None):
 
     if os.path.exists(db_info.config.output.temp):
         shutil.rmtree(db_info.config.output.temp)
+
+    del config
 
     logger.info("Cleaned up.")
 

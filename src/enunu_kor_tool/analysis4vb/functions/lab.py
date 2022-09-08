@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Dict
+from typing import Dict, List
 
 from tqdm import tqdm
 
@@ -38,7 +38,8 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
     """
 
     phonemes_files = db_info.files.lab
-    encoding = db_info.config.options.get("encoding", "utf-8")
+    use_100ns = db_info.config.options.get("use_100ns", False)
+    encoding = db_info.config.options.get("lab_encoding", "utf-8")
     line_num_formatter = lambda ln: str(ln).rjust(4)
 
     error_flag = False
@@ -47,7 +48,7 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
     lab_global_error_line_count = 0
     for file in (file_tqdm := tqdm(phonemes_files, leave=False)):
         file_tqdm.set_description(f"Processing... [{file}]")
-        logger.info(L("[{filepath}] 파일 로드 중...", filepath=os.path.relpath(file)))
+        logger.info(L("[{filepath}] 파일 로드 중...", filepath=file))
 
         lab = []
 
@@ -96,7 +97,7 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
             L(
                 "lab 파일을 로드했습니다. [총 라인 수: {line_num}] [길이: {round_length}s ({length} 100ns)] [오류 라인 수: {error_line_count}]",
                 line_num=line_num_formatter(lab_len),
-                round_length=round(__100ns2s(length), 1),
+                round_length=length if use_100ns else round(__100ns2s(length), 1),
                 length=length,
                 error_line_count=error_line_count,
             )
@@ -110,7 +111,9 @@ def __lab_loader(db_info: DB_Info, logger: logging.Logger) -> bool:
             lab_global_error_line_count=lab_global_error_line_count,
         )
     )
-    db_info.cache["labs"] = labs
+
+    if labs != None and len(labs) > 0:
+        db_info.cache["labs"] = labs
 
     return error_flag
 
@@ -122,7 +125,11 @@ def lab_error_check(db_info: DB_Info, logger: logging.Logger):
 
 
 @__preprocess
-def phoneme_count(db_info: DB_Info, logger: logging.Logger):
+def phoneme_count(db_info: DB_Info, logger: logging.Logger, quiet_mode: bool = False):
+    if "labs" not in db_info.cache:
+        logger.error(L("로드된 Lab 파일을 찾을 수 없습니다."))
+        return
+
     config_group = db_info.config.group
     is_show_graph = db_info.config.options["graph_show"]
     is_save_graph = db_info.config.options["graph_save"]
@@ -158,7 +165,7 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
             else:
                 add_one(group_phoneme_count_dict, "error")
 
-    if is_show_graph or is_save_graph:
+    if not quiet_mode and (is_show_graph or is_save_graph):
         logger.info(L("그래프 출력 중..."))
         graph_path = db_info.config.output.graph
         graph_show_dpi = db_info.config.options["graph_show_dpi"]
@@ -219,8 +226,13 @@ def phoneme_count(db_info: DB_Info, logger: logging.Logger):
 
 
 @__preprocess
-def phoneme_length(db_info: DB_Info, logger: logging.Logger):
+def phoneme_length(db_info: DB_Info, logger: logging.Logger, quiet_mode: bool = False):
+    if "labs" not in db_info.cache:
+        logger.error(L("로드된 Lab 파일을 찾을 수 없습니다."))
+        return
+
     config_group = db_info.config.group
+    use_100ns = db_info.config.options.get("use_100ns", False)
     is_show_graph = db_info.config.options["graph_show"]
     is_save_graph = db_info.config.options["graph_save"]
     labs: Dict = db_info.cache["labs"]
@@ -236,15 +248,15 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
 
     def add_one(dic: Dict, name: str, length: int):
         if name in dic:
-            dic[name] += __100ns2s(length)
+            dic[name] += length if use_100ns else __100ns2s(length)
         else:
-            dic[name] = __100ns2s(length)
+            dic[name] = length if use_100ns else __100ns2s(length)
 
-    def add_one_list(dic: Dict, name: str, length: int):
+    def add_one_list(dic: Dict[str, List[str]], name: str, length: int):
         if name in dic:
-            dic[name].append(__100ns2s(length))
+            dic[name].append(length if use_100ns else __100ns2s(length))
         else:
-            dic[name] = [__100ns2s(length)]
+            dic[name] = [length if use_100ns else __100ns2s(length)]
 
     for file, lab in (labs_tqdm := tqdm(labs.items(), leave=False)):
         labs_tqdm.set_description(f"[{file}] Calculating...")
@@ -264,10 +276,11 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
             else:
                 add_one(group_phoneme_length_dict, "error", end - start)
 
-    if is_show_graph or is_save_graph:
+    if not quiet_mode and (is_show_graph or is_save_graph):
         logger.info(L("그래프 출력 중..."))
         graph_path = db_info.config.output.graph
         graph_show_dpi = db_info.config.options["graph_show_dpi"]
+        unit_suffix = "(100ns)" if use_100ns else "(s)"
 
         utils.matplotlib_init(db_info.config.options["graph_darkmode"])
         from matplotlib import pyplot as plt
@@ -283,9 +296,9 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
         single_phoneme_length_sorted_dict = dict(sorted(single_phoneme_length_dict.items(), key=lambda item: item[1], reverse=True))
         keys, values = list(single_phoneme_length_sorted_dict.keys()), list(single_phoneme_length_sorted_dict.values())
         b1 = plt.bar(keys, values, width=0.7)
-        plt.bar_label(b1, fmt="%.1fs")
+        plt.bar_label(b1)
 
-        plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2fs"))
+        plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter(f"%.2f{unit_suffix}"))
 
         plt.title(L("Phonemes Length Statistics"))
         plt.xlabel(L("Phoneme"))
@@ -312,9 +325,9 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
         values.insert(1, total_length_except_silence)
 
         b1 = plt.bar(keys, values, width=0.7)
-        plt.bar_label(b1, fmt="%.1fs")
+        plt.bar_label(b1)
 
-        plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2fs"))
+        plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter(f"%.2f{unit_suffix}"))
 
         plt.title(L("Phonemes Length Statistics by Group"))
         plt.xlabel(L("Phoneme Group"))
@@ -347,7 +360,7 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
             x = [i + random.uniform(-scatter_range, scatter_range) for _ in range(len(v))]
             plt.scatter(x, v)
 
-        plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter("%.2fs"))
+        plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter(f"%.2f{unit_suffix}"))
 
         plt.title(L("Phonemes Length Statistics [Box plot]"))
         plt.xlabel(L("Phoneme"))
@@ -361,3 +374,141 @@ def phoneme_length(db_info: DB_Info, logger: logging.Logger):
 
     db_info.stats["phoneme_length"] = phoneme_length_dict
     return phoneme_length_dict
+
+
+@__preprocess
+def phoneme_average_length(db_info: DB_Info, logger: logging.Logger, quiet_mode: bool = False):
+    if "labs" not in db_info.cache:
+        logger.error(L("로드된 Lab 파일을 찾을 수 없습니다."))
+        return
+
+    is_show_graph = db_info.config.options["graph_show"]
+    is_save_graph = db_info.config.options["graph_save"]
+
+    if "phoneme_count" not in db_info.stats:
+        phoneme_count(db_info, logger, True)
+    if "phoneme_length" not in db_info.stats:
+        phoneme_length(db_info, logger, True)
+
+    phoneme_count_stats: Dict[str, Dict[str, int]] = db_info.stats["phoneme_count"]
+    phoneme_count_stats_group = phoneme_count_stats["group"]
+    phoneme_count_stats_single = phoneme_count_stats["single"]
+    phoneme_length_stats: Dict[str, Dict[str, float]] = db_info.stats["phoneme_length"]
+    phoneme_length_stats_group = phoneme_length_stats["group"]
+    phoneme_length_stats_single = phoneme_length_stats["single"]
+
+    group_phoneme_average_length_dict = {}
+    single_phoneme_average_length_dict = {}
+    phoneme_average_length_dict = {
+        "group": group_phoneme_average_length_dict,
+        "single": single_phoneme_average_length_dict,
+    }
+
+    def add_one(dic: Dict, name: str, length: float):
+        if name in dic:
+            dic[name] += length
+        else:
+            dic[name] = length
+
+    for phn in phoneme_count_stats_single.keys():
+        add_one(single_phoneme_average_length_dict, phn, phoneme_length_stats_single[phn] / phoneme_count_stats_single[phn])
+
+    for key in ["consonant", "vowel", "silence", "other", "error"]:
+        if key in phoneme_length_stats_group and key in phoneme_count_stats_group:
+            add_one(group_phoneme_average_length_dict, key, phoneme_length_stats_group[key] / phoneme_count_stats_group[key])
+
+    # from pprint import pprint
+
+    # pprint(single_phoneme_average_length_dict)
+
+    if not quiet_mode and (is_show_graph or is_save_graph):
+        config_group = db_info.config.group
+        logger.info(L("그래프 출력 중..."))
+        graph_path = db_info.config.output.graph
+        graph_show_dpi = db_info.config.options["graph_show_dpi"]
+        use_100ns = db_info.config.options.get("use_100ns", False)
+        unit_suffix = "(100ns)" if use_100ns else "(s)"
+
+        utils.matplotlib_init(db_info.config.options["graph_darkmode"])
+        from matplotlib import pyplot as plt
+        import matplotlib.ticker as mticker
+
+        #####
+        # * # 단일 음소 평균 길이 그래프
+        #####
+        plot_name = "phoneme_average_length_single"
+        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 8), dpi=graph_show_dpi)
+
+        single_phoneme_average_length_sorted_dict = dict(sorted(single_phoneme_average_length_dict.items(), key=lambda item: item[1], reverse=True))
+        keys, values = list(single_phoneme_average_length_sorted_dict.keys()), list(single_phoneme_average_length_sorted_dict.values())
+        b1 = plt.bar(keys, values, width=0.7)
+        plt.bar_label(b1, rotation=45)
+
+        plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter(f"%.2f{unit_suffix}"))
+
+        plt.title(L("Phonemes Average Length Statistics"))
+        plt.xlabel(L("Phoneme"))
+        plt.ylabel(L("Length"))
+        plt.tight_layout()
+
+        if is_save_graph:
+            plt.savefig(os.path.join(graph_path, f"{plot_name}.jpg"), dpi=200)
+        if is_show_graph:
+            plt.show(block=False)
+
+        #####
+        # * # 무음 제외 단일 음소 평균 길이 그래프
+        #####
+        plot_name = "phoneme_average_length_single_except_silence"
+        plt.figure(utils.get_plot_num(plot_name), figsize=(16, 8), dpi=graph_show_dpi)
+
+        for rest_phn in config_group.silence:
+            if rest_phn in single_phoneme_average_length_sorted_dict:
+                del single_phoneme_average_length_sorted_dict[rest_phn]
+        keys, values = list(single_phoneme_average_length_sorted_dict.keys()), list(single_phoneme_average_length_sorted_dict.values())
+        b1 = plt.bar(keys, values, width=0.7)
+        plt.bar_label(b1, rotation=45)
+
+        plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter(f"%.2f{unit_suffix}"))
+
+        plt.title(L("Phonemes Average Length Statistics (except silence)"))
+        plt.xlabel(L("Phoneme"))
+        plt.ylabel(L("Length"))
+        plt.tight_layout()
+
+        if is_save_graph:
+            plt.savefig(os.path.join(graph_path, f"{plot_name}.jpg"), dpi=200)
+        if is_show_graph:
+            plt.show(block=False)
+
+        #####
+        # * # 그룹 음소 평균 길이 그래프
+        #####
+        plot_name = "phoneme_average_length_group"
+        plt.figure(utils.get_plot_num(plot_name), dpi=graph_show_dpi)
+
+        keys, values = list(group_phoneme_average_length_dict.keys()), list(group_phoneme_average_length_dict.values())
+        total_average_length = sum(values)
+        total_average_length_except_silence = total_average_length - group_phoneme_average_length_dict["silence"]
+        keys.insert(0, "Total")
+        values.insert(0, total_average_length)
+        keys.insert(1, "Total\n(except silence)")
+        values.insert(1, total_average_length_except_silence)
+
+        b1 = plt.bar(keys, values, width=0.7)
+        plt.bar_label(b1)
+
+        plt.gca().yaxis.set_major_formatter(mticker.FormatStrFormatter(f"%.2f{unit_suffix}"))
+
+        plt.title(L("Phonemes Average Length Statistics by Group"))
+        plt.xlabel(L("Phoneme Group"))
+        plt.ylabel(L("Length"))
+        plt.tight_layout()
+
+        if is_save_graph:
+            plt.savefig(os.path.join(graph_path, f"{plot_name}.jpg"), dpi=200)
+        if is_show_graph:
+            plt.show(block=False)
+
+    db_info.stats["phoneme_average_length"] = phoneme_average_length_dict
+    return phoneme_average_length_dict

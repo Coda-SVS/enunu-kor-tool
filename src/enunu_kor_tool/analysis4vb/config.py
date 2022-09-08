@@ -12,7 +12,9 @@ DEFAULT_CONFIG = {
     },
     "options": {
         "log_level": "info",
-        "encoding": "utf-8",
+        "lab_encoding": "utf-8",
+        "ust_encoding": "cp932",
+        "use_100ns": False,
         "graph_save": True,
         "graph_show": False,
         "graph_darkmode": True,
