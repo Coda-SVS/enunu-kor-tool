@@ -1,2 +1,2 @@
 package_name = "enunu_kor_tool"
-version = "0.1.4"
+version = "0.1.5"
