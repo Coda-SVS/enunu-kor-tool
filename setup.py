@@ -73,10 +73,12 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "g2pk4utau=enunu_kor_tool.g2pk4utau.g2pk4utau:main",
+            "ustx2ust=enunu_kor_tool.entry.ustx2ust:main",
             "ustx2lab=enunu_kor_tool.entry.ustx2lab:main",
             "lab2ntlab=enunu_kor_tool.entry.lab2ntlab:main",
             "analysis4vb=enunu_kor_tool.analysis4vb.analysis:main",
             "check4lab=enunu_kor_tool.entry.check4lab:main",
+            "lab2ust_fixer=enunu_kor_tool.entry.lab2ust_fixer:main",
             "exe_entry=enunu_kor_tool.entry.exe_entry:main",
             # "ust2lab4model=enunu_kor_tool.entry.ust2lab4model:main",
         ]
