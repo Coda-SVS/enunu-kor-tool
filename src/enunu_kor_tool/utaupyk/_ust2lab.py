@@ -8,7 +8,6 @@ UST版
 - '{out_dir}/sinsy_mono' にモノラベルを生成する。(この工程は省略した)
 - '{out_dir}/mono_label' にDBのモノラベルを複製する
 """
-import logging
 from glob import glob
 from os import makedirs
 from os.path import basename, join, splitext
@@ -17,6 +16,8 @@ from sys import argv
 import yaml
 from natsort import natsorted
 from tqdm import tqdm
+
+from enunu_kor_tool import log
 
 
 def ust2full(path_ust_dir_in, path_full_dir_out, path_table, exclude_songs, lang_mode):
@@ -67,6 +68,9 @@ def compare_name_of_ustfiles_and_labfiles(ust_dir, mono_align_dir):
     """
     入力ファイルの名前が一致するか点検する。
     """
+
+    logger = log.get_logger(compare_name_of_ustfiles_and_labfiles)
+    
     # UST一覧を取得
     ust_files = natsorted(glob(f"{ust_dir}/*.ust"))
     # DB内のラベルファイル一覧を取得
@@ -82,9 +86,9 @@ def compare_name_of_ustfiles_and_labfiles(ust_dir, mono_align_dir):
     # すべての名前が一致したか確認
     if len(songnames_dont_match) != 0:
         for path_ust_and_path_lab in songnames_dont_match:
-            logging.error("USTファイル名とLABファイル名が一致しません:")
-            logging.error("  path_ust: %s", path_ust_and_path_lab[0])
-            logging.error("  path_lab: %s", path_ust_and_path_lab[1])
+            logger.error("USTファイル名とLABファイル名が一致しません:")
+            logger.error("  path_ust: %s", path_ust_and_path_lab[0])
+            logger.error("  path_lab: %s", path_ust_and_path_lab[1])
         raise ValueError("USTファイル名とLABファイル名が一致しませんでした。ファイル名を点検してください")
 
 
