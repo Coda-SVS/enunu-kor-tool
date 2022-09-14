@@ -8,7 +8,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
 
 from enunu_kor_tool import log, utils, lang
-from enunu_kor_tool.entry import ustx2lab
+from enunu_kor_tool.entry import lab2ntlab, ustx2lab
 
 L = lang.get_global_lang()
 
@@ -26,10 +26,16 @@ class UST_LAB_FileWatcher(FileSystemEventHandler):
         return list(filter(lambda p: self._temp_path not in p, paths))
 
     def on_modified(self, event: FileSystemEvent):
-        if self._temp_path in event.src_path:
+        if self._temp_path in event.src_path or "-autosave" in event.src_path or "_no-time" in event.src_path:
+            return
+
+        ext = os.path.splitext(event.src_path)[1]
+        if ext not in [".lab", ".ust", ".ustx", ".wav"]:  # ? .wav는 필요 없을 수 있음.
             return
 
         if event.event_type == "modified":
+            os.makedirs(self._temp_path, exist_ok=True)
+
             param_dict = {}
             filepath = event.src_path
 
@@ -70,7 +76,10 @@ class UST_LAB_FileWatcher(FileSystemEventHandler):
             param_dict["table_path"] = self._table_path
             param_dict["temp_path"] = self._temp_path
             param_dict["use_g2pk4utau"] = self._use_g2pk4utau
-            compare_ust_lab(**param_dict)
+            try:
+                compare_ust_lab(**param_dict)
+            except Exception as ex:
+                logger.warning(str(ex))
 
 
 def compare_ust_lab(table_path: str, ust_ustx_path: str, lab_path: str, temp_path: str, use_g2pk4utau: bool):
@@ -94,6 +103,9 @@ def compare_ust_lab(table_path: str, ust_ustx_path: str, lab_path: str, temp_pat
     filename = os.path.splitext(os.path.basename(ust_ustx_path))[0]
     score_lab = os.path.join(temp_path, f"{filename}.lab")
     ustx2lab.ustx2lab(table_path, ust_ustx_path, temp_path, use_g2pk4utau=use_g2pk4utau)
+
+    lab2ntlab.lab2ntlab(score_lab, temp_path, suffix="_score")
+    lab2ntlab.lab2ntlab(lab_path, temp_path, suffix="_align")
 
     align_lab_lines = None
     score_lab_lines = None
@@ -211,8 +223,6 @@ def main(args=None):
 
     if not os.path.isdir(db_path):
         logger.error(L("{path}에 폴더가 존재하지 않습니다.", path=db_path))
-
-    os.makedirs(db_temp_path, exist_ok=True)
 
     observer = Observer()
     observer.schedule(UST_LAB_FileWatcher(db_path, args["table"], db_temp_path, args["use_g2pk4utau"]), db_path, recursive=True)
