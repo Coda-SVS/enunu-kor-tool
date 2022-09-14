@@ -107,10 +107,7 @@ def ust2lab_main(path_config_yaml):
     out_dir = config["out_dir"].strip('"')
     path_table = config["table_path"].strip('"')
 
-    try:
-        lang_mode = config["stage0"]["lang_mode"].strip('"')
-    except KeyError:
-        lang_mode = "jpn"
+    lang_mode = config["stage0"].get("lang_mode", "jpn").strip('"')
 
     ust_dir = join(out_dir, "ust")
     mono_align_dir = join(out_dir, "lab")
