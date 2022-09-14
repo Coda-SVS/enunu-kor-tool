@@ -26,7 +26,7 @@ import utaupy as up
 
 from tqdm import tqdm
 
-from enunu_kor_tool import g2pk4utau
+from enunu_kor_tool import g2pk4utau, log
 
 
 # def note_preprocessing(note: up.ust.Note) -> bool:
@@ -59,6 +59,8 @@ def ustnote2htsnote(ust_note_block: Tuple[up.ust.Note, up.ust.Note, up.ust.Note]
     utaupy.ust.Note を utaupy.hts.Note に変換する。
     """
     assert len(ust_note_block) == 3
+
+    logger = log.get_logger(ustnote2htsnote)
 
     # ノート全体の情報を登録
     hts_note = up.hts.Note()
@@ -98,7 +100,7 @@ def ustnote2htsnote(ust_note_block: Tuple[up.ust.Note, up.ust.Note, up.ust.Note]
                 elif idx == 0:
                     current_phn_idx = 0
 
-        kor_phn_result = g2p_converter(g2pk4utau.clear_Special_Character(orginal_lyrics))
+        kor_phn_result = g2p_converter(g2pk4utau.clear_Special_Character(lyric_preprocessing(orginal_lyrics)))
         if g2pk4utau.is_in_hangul(ust_note_block[1].lyric):
             kor_phn_tokens = kor_phn_result[2][current_phn_idx]
         else:
@@ -119,11 +121,11 @@ def ustnote2htsnote(ust_note_block: Tuple[up.ust.Note, up.ust.Note, up.ust.Note]
                     temp_phn_tokens.append(kor_phn_tokens if isinstance(kor_phn_tokens, str) else " ".join(kor_phn_tokens))
             kor_phn_token = " ".join(temp_phn_tokens)
 
-            tqdm.write(f"\033[1;33m G* [{orginal_lyrics}] -> [{kor_phn_result[1]}] -> [{kor_phn_tokens} ({current_phn_idx})] -> [{kor_phn_token}]\033[0m")
+            logger.info(f"\033[1;33m G* [{orginal_lyrics}] -> [{kor_phn_result[1]}] -> [{kor_phn_tokens} ({current_phn_idx})] -> [{kor_phn_token}]\033[0m")
         else:
             kor_phn_token: str = kor_phn_tokens if isinstance(kor_phn_tokens, str) else " ".join(kor_phn_tokens)
 
-            tqdm.write(f"\033[1;33m G  [{orginal_lyrics}] -> [{kor_phn_result[1]}] -> [{kor_phn_tokens} ({current_phn_idx})] -> [{kor_phn_token}]\033[0m")
+            logger.info(f"\033[1;33m G  [{orginal_lyrics}] -> [{kor_phn_result[1]}] -> [{kor_phn_tokens} ({current_phn_idx})] -> [{kor_phn_token}]\033[0m")
 
         phonemes += kor_phn_token.split(" ")
     else:
@@ -132,7 +134,7 @@ def ustnote2htsnote(ust_note_block: Tuple[up.ust.Note, up.ust.Note, up.ust.Note]
         for lyric in orginal_lyrics:
             phonemes += d_table.get(lyric, [lyric])
 
-        tqdm.write(f"\033[1;32m D  [{ust_note_block[1].lyric}] -> [{orginal_lyrics}] -> [{phonemes}]\033[0m")
+        logger.info(f"\033[1;32m D  [{ust_note_block[1].lyric}] -> [{orginal_lyrics}] -> [{phonemes}]\033[0m")
 
     # tqdm.write(f"[{phonemes}]")
 
@@ -165,25 +167,20 @@ def ustobj2songobj(ust: up.ust.Ust, d_table: dict, g2p_converter=None, key_of_th
         Sinsyでは 0 ~ 11 または 'xx' である。
     """
 
+    logger = log.get_logger(ustobj2songobj)
+
     if g2p_converter == None:
-        g2p_converter = g2pk4utau.g2pk4utau()
+        logger.info("> Unable g2p_converter")
+    else:
+        logger.info("> Apply g2p_converter")
 
     song = up.hts.Song()
     # Noteオブジェクトの種類を変換
     notes_len = len(ust.notes)
 
-    range_idx = 10
+    logger.debug(f"notes_len: {notes_len}")
 
-    for idx in (phn_tqdm := tqdm(range(notes_len := len(ust.notes)), leave=False)):
-        s_idx = idx - range_idx
-        e_idx = idx + range_idx
-        if s_idx < 0:
-            s_idx = 0
-        if e_idx >= notes_len:
-            e_idx = notes_len - 1
-
-        phn_tqdm.set_description(f"Lyric = " + "".join([note.lyric for note in ust.notes[s_idx:e_idx]]))
-
+    for idx in tqdm(range(notes_len), leave=False):
         prev_note = ust.notes[idx - 1] if idx != 0 else ""
         next_note = ust.notes[idx + 1] if idx + 1 < notes_len else ""
 
