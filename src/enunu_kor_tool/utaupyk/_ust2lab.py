@@ -18,24 +18,21 @@ import yaml
 from natsort import natsorted
 from tqdm import tqdm
 
-g2p_converter = None
-
 
 def ust2full(path_ust_dir_in, path_full_dir_out, path_table, exclude_songs, lang_mode):
     """
     複数のUSTファイルから、フルラベルファイルを一括生成する。
     """
-    global g2p_converter
-
     makedirs(path_full_dir_out, exist_ok=True)
     ust_files = glob(f"{path_ust_dir_in}/**/*.ust", recursive=True)
 
-    if lang_mode == "kor" and g2p_converter == None:
-        from enunu_kor_tool import g2pk4utau, utaupyk
+    if lang_mode == "kor":
+        from enunu_kor_tool import g2pk4utau
+        from enunu_kor_tool.utaupyk import _ust2hts as utaupyk_ust2hts
 
         # 객체 생성 시 높은 오버헤드 때문에 시간이 오래걸리는 문제 해결
         # 모든 작업이 끝나고 해제되도록 외부에서 초기화
-        g2p_converter = g2pk4utau.g2pk4utau()
+        g2p_converter = g2pk4utau.g2pk4utau.get_instance()
     else:
         from utaupy.utils import ust2hts
 
@@ -46,7 +43,7 @@ def ust2full(path_ust_dir_in, path_full_dir_out, path_table, exclude_songs, lang
         else:
             path_full = f"{path_full_dir_out}/{songname}.lab"
             if lang_mode == "kor":
-                utaupyk.ust2hts(path_ust, path_full, path_table, g2p_converter=g2p_converter, strict_sinsy_style=False)
+                utaupyk_ust2hts.ust2hts(path_ust, path_full, path_table, g2p_converter=g2p_converter, strict_sinsy_style=False)
             else:
                 ust2hts(path_ust, path_full, path_table, strict_sinsy_style=False)
 
