@@ -47,13 +47,27 @@ class Ustx2Ust_Converter:
                     self.ustx = yaml.load(f, Loader=FullLoader)
 
     def save_ust(self, path: str, flag: str = "", encoding: str = "utf-8"):
+        part_index = 0
+
         project = self.ustx
-        project_body = project["voice_parts"][0]
+
+        tempo = project.get("bpm")
+        if "tempos" in project:
+            tempos = project["tempos"]
+
+            for t in tempos:
+                if t["position"] == part_index:
+                    tempo = t["bpm"]
+                    break
+
+        assert tempo != None, "Unable to get tempo value."
+
+        project_body = project["voice_parts"][part_index]
 
         with open(path, "w", encoding="utf-8") as ust:
             # Header
             ust.write("[#SETTING]\n")
-            ust.write(f"Tempo={project['bpm']}\n")
+            ust.write(f"Tempo={tempo}\n")
             ust.write("Tracks=1\n")
             ust.write(f"Charset={encoding}\n")
             ust.write(f"Project={project_body['name']}.ust\n")
