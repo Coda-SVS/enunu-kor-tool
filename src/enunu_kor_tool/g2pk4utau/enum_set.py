@@ -1,4 +1,4 @@
-from enum import Flag, auto, unique
+from enum import Enum, Flag, auto, unique
 
 
 @unique
@@ -19,3 +19,10 @@ class VerboseMode(Flag):
 
     def __contains__(self, item) -> bool:
         return (self.value & item.value) == item.value
+
+
+@unique
+class CacheMode(Enum):
+    NONE = auto()
+    MEMORY = auto()
+    FILE = auto()

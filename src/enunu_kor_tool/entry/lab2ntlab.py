@@ -18,7 +18,7 @@ def cli_ui_main():
     main(args)
 
 
-def lab2ntlab(path: str, output_path: str):
+def lab2ntlab(path: str, output_path: str, suffix: str = ""):
     os.makedirs(output_path, exist_ok=True)
 
     phn = []
@@ -26,7 +26,7 @@ def lab2ntlab(path: str, output_path: str):
         phn = [" ".join(line.strip("\n ").split(" ")[2:]) for line in f.readlines()]
 
     filename, ext = os.path.splitext(os.path.basename(path))
-    filename = f"{filename}_no-time{ext}"
+    filename = f"{filename}_no-time{suffix}{ext}"
 
     pprint(phn)
 

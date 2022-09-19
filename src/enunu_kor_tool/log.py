@@ -64,8 +64,8 @@ def get_logger(name: Union[str, Callable], logLevel: Union[int, str] = logging.I
             if path_name == version.package_name:
                 break
             paths.append(path_name)
-        paths.append(name.__name__)
-        name = ".".join(paths)
+        paths.reverse()
+        name = ".".join(paths) + f":{name.__name__}"
 
     if not logging.root.hasHandlers():
         os.makedirs(DIR_PATH, exist_ok=True)

@@ -8,7 +8,6 @@ UST版
 - '{out_dir}/sinsy_mono' にモノラベルを生成する。(この工程は省略した)
 - '{out_dir}/mono_label' にDBのモノラベルを複製する
 """
-import logging
 from glob import glob
 from os import makedirs
 from os.path import basename, join, splitext
@@ -18,24 +17,23 @@ import yaml
 from natsort import natsorted
 from tqdm import tqdm
 
-g2p_converter = None
+from enunu_kor_tool import log
 
 
 def ust2full(path_ust_dir_in, path_full_dir_out, path_table, exclude_songs, lang_mode):
     """
     複数のUSTファイルから、フルラベルファイルを一括生成する。
     """
-    global g2p_converter
-
     makedirs(path_full_dir_out, exist_ok=True)
     ust_files = glob(f"{path_ust_dir_in}/**/*.ust", recursive=True)
 
-    if lang_mode == "kor" and g2p_converter == None:
-        from enunu_kor_tool import g2pk4utau, utaupyk
+    if lang_mode == "kor":
+        from enunu_kor_tool import g2pk4utau
+        from enunu_kor_tool.utaupyk import _ust2hts as utaupyk_ust2hts
 
         # 객체 생성 시 높은 오버헤드 때문에 시간이 오래걸리는 문제 해결
         # 모든 작업이 끝나고 해제되도록 외부에서 초기화
-        g2p_converter = g2pk4utau.g2pk4utau()
+        g2p_converter = g2pk4utau.g2pk4utau.get_instance()
     else:
         from utaupy.utils import ust2hts
 
@@ -46,7 +44,7 @@ def ust2full(path_ust_dir_in, path_full_dir_out, path_table, exclude_songs, lang
         else:
             path_full = f"{path_full_dir_out}/{songname}.lab"
             if lang_mode == "kor":
-                utaupyk.ust2hts(path_ust, path_full, path_table, g2p_converter=g2p_converter, strict_sinsy_style=False)
+                utaupyk_ust2hts.ust2hts(path_ust, path_full, path_table, g2p_converter=g2p_converter, strict_sinsy_style=False)
             else:
                 ust2hts(path_ust, path_full, path_table, strict_sinsy_style=False)
 
@@ -70,6 +68,9 @@ def compare_name_of_ustfiles_and_labfiles(ust_dir, mono_align_dir):
     """
     入力ファイルの名前が一致するか点検する。
     """
+
+    logger = log.get_logger(compare_name_of_ustfiles_and_labfiles)
+    
     # UST一覧を取得
     ust_files = natsorted(glob(f"{ust_dir}/*.ust"))
     # DB内のラベルファイル一覧を取得
@@ -85,9 +86,9 @@ def compare_name_of_ustfiles_and_labfiles(ust_dir, mono_align_dir):
     # すべての名前が一致したか確認
     if len(songnames_dont_match) != 0:
         for path_ust_and_path_lab in songnames_dont_match:
-            logging.error("USTファイル名とLABファイル名が一致しません:")
-            logging.error("  path_ust: %s", path_ust_and_path_lab[0])
-            logging.error("  path_lab: %s", path_ust_and_path_lab[1])
+            logger.error("USTファイル名とLABファイル名が一致しません:")
+            logger.error("  path_ust: %s", path_ust_and_path_lab[0])
+            logger.error("  path_lab: %s", path_ust_and_path_lab[1])
         raise ValueError("USTファイル名とLABファイル名が一致しませんでした。ファイル名を点検してください")
 
 
@@ -107,10 +108,7 @@ def ust2lab_main(path_config_yaml):
     out_dir = config["out_dir"].strip('"')
     path_table = config["table_path"].strip('"')
 
-    try:
-        lang_mode = config["stage0"]["lang_mode"].strip('"')
-    except KeyError:
-        lang_mode = "jpn"
+    lang_mode = config["stage0"].get("lang_mode", "jpn").strip('"')
 
     ust_dir = join(out_dir, "ust")
     mono_align_dir = join(out_dir, "lab")

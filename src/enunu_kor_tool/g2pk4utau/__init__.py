@@ -1,4 +1,4 @@
-from .enum_set import VerboseMode
+from .enum_set import VerboseMode, CacheMode
 from .hangul_dic import (
     get_phn_dictionary,
     replace2pre_phn,

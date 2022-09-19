@@ -7,6 +7,8 @@ import yaml
 from tqdm import tqdm
 from yaml import loader
 
+from enunu_kor_tool import utils
+
 
 class FullLoader(loader.Reader, loader.Scanner, loader.Parser, loader.Composer, loader.FullConstructor, loader.Resolver):
     def __init__(self, stream):
@@ -44,15 +46,30 @@ class Ustx2Ust_Converter:
                 with open(path, mode="r", encoding="utf-8_sig") as f:
                     self.ustx = yaml.load(f, Loader=FullLoader)
 
-    def save_ust(self, path: str):
+    def save_ust(self, path: str, flag: str = "", encoding: str = "utf-8"):
+        part_index = 0
+
         project = self.ustx
-        project_body = project["voice_parts"][0]
+
+        tempo = project.get("bpm")
+        if "tempos" in project:
+            tempos = project["tempos"]
+
+            for t in tempos:
+                if t["position"] == part_index:
+                    tempo = t["bpm"]
+                    break
+
+        assert tempo != None, "Unable to get tempo value."
+
+        project_body = project["voice_parts"][part_index]
 
         with open(path, "w", encoding="utf-8") as ust:
             # Header
             ust.write("[#SETTING]\n")
-            ust.write(f"Tempo={project['bpm']}\n")
+            ust.write(f"Tempo={tempo}\n")
             ust.write("Tracks=1\n")
+            ust.write(f"Charset={encoding}\n")
             ust.write(f"Project={project_body['name']}.ust\n")
             ust.write(f"CacheDir={project_body['name']}.cache\n")
             ust.write("Mode2=True\n")
@@ -68,7 +85,9 @@ class Ustx2Ust_Converter:
                     ust.write(f"Length={current_pos - position}\n")
                     ust.write("NoteNum=60\n")
                     ust.write("Lyric=R\n")
-                    ust.write("PreUtterance=\n")
+                    if utils.is_not_null_str(flag):
+                        ust.write(f"Flags={flag}\n")
+                    # ust.write("PreUtterance=\n")
 
                     idx += 1
 
@@ -76,7 +95,9 @@ class Ustx2Ust_Converter:
                 ust.write(f"Length={current_dur}\n")
                 ust.write(f"NoteNum={note['tone']}\n")
                 ust.write(f"Lyric={note['lyric']}\n")
-                ust.write("PreUtterance=\n")
+                if utils.is_not_null_str(flag):
+                    ust.write(f"Flags={flag}\n")
+                # ust.write("PreUtterance=\n")
 
                 idx += 1
                 position = current_pos + current_dur
@@ -85,7 +106,7 @@ class Ustx2Ust_Converter:
 
             ust.write(f"[#TRACKEND]\n")
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         # result = ""
 
         # for k, v in self.ustx:
@@ -93,8 +114,11 @@ class Ustx2Ust_Converter:
 
         return str(self.ustx)
 
+    def __str__(self) -> str:
+        return self.__repr__()
 
-def ustx2ust(db_root, out_dir):
+
+def ustx2ust(db_root, out_dir, flag=""):
     target_files = glob(f"{db_root}/**/*.ustx", recursive=True)
     if len(target_files) != 0:
         os.makedirs(out_dir, exist_ok=True)
@@ -104,7 +128,7 @@ def ustx2ust(db_root, out_dir):
                 continue
             converter = Ustx2Ust_Converter(path)
             name, ext = os.path.splitext(os.path.basename(path))
-            converter.save_ust(os.path.join(out_dir, f"{name}.ust"))
+            converter.save_ust(os.path.join(out_dir, f"{name}.ust"), flag)
 
 
 import shutil
