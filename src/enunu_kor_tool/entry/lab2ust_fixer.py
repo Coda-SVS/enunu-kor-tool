@@ -143,7 +143,7 @@ def main(args=None):
         parser = argparse.ArgumentParser(description="LAB 파일로 UST 파일의 타이밍을 보정합니다.")
 
         parser.add_argument("-d", dest="table", required=True, help="table 파일 경로")
-        parser.add_argument("-p", dest="vowel_list", required=True, help="모음 리스트 (,로 구분)")
+        parser.add_argument("-p", dest="vowel_list", required=True, help="모음 리스트 (,로 구분)")  # kor: a,eo,o,u,i,eu,e,y,w
         parser.add_argument("-i", dest="input", required=True, help="DB 폴더 경로")
         parser.add_argument("-o", dest="output", required=True, help="출력 폴더 경로")
         parser.add_argument("--no-g2p", dest="notuse_g2pk4utau", action="store_false", help="g2pk4utau를 사용하지 않습니다.")
