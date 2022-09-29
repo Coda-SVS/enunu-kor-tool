@@ -34,7 +34,7 @@ from enunu_kor_tool import g2pk4utau, log
 
 
 def lyric_preprocessing(lyric: str) -> str:
-    return lyric.replace("i'am", "i am").replace("we're", "we are").replace("you're", "you are").replace("'", " ")
+    return lyric.replace("수", " 수").replace("릴 수", "릴 쑤").replace("세게", "쎄게").replace("'m", " am").replace("'re", " are").replace("'", " ")
 
 
 def is_lyric(note: up.ust.Note, d_table: dict) -> bool:
