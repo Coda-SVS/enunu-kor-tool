@@ -159,6 +159,8 @@ def get_phn_dictionary(labeling_mode: bool = True):
         (r"ㄹ(\s*)ㅎ", r"RR\1 "),
         # 모음과 모음 사이 'ㄹ'
         (r"(?<=[ㅏ-ㅣ]\s*)ㄹ(?=\s*[ㅏ-ㅣ])", r"r "),
+        # 'ㄹ'뒤의 'ㅅ'은 'ㅆ'으로 발음
+        (r"(ㄹ\s*)ㅅ", r"\1ss "),
     ]
 
     # if labeling_mode:
