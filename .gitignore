@@ -9,6 +9,8 @@
 /src/enunu_kor_tool/entry/enunu4tts.py
 /src/enunu_kor_tool/entry/sil_calculate.py
 
+/venv_start.ps1
+
 # Created by https://www.toptal.com/developers/gitignore/api/python,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,visualstudiocode
 
