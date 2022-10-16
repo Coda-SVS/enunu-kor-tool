@@ -64,6 +64,8 @@ class Ustx2Ust_Converter:
 
         project_body = project["voice_parts"][part_index]
 
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+
         with open(path, "w", encoding="utf-8") as ust:
             # Header
             ust.write("[#SETTING]\n")
@@ -85,8 +87,7 @@ class Ustx2Ust_Converter:
                     ust.write(f"Length={current_pos - position}\n")
                     ust.write("NoteNum=60\n")
                     ust.write("Lyric=R\n")
-                    if utils.is_not_null_str(flag):
-                        ust.write(f"Flags={flag}\n")
+                    ust.write(f"Flags={flag}\n")
                     # ust.write("PreUtterance=\n")
 
                     idx += 1
@@ -95,8 +96,7 @@ class Ustx2Ust_Converter:
                 ust.write(f"Length={current_dur}\n")
                 ust.write(f"NoteNum={note['tone']}\n")
                 ust.write(f"Lyric={note['lyric']}\n")
-                if utils.is_not_null_str(flag):
-                    ust.write(f"Flags={flag}\n")
+                ust.write(f"Flags={flag}\n")
                 # ust.write("PreUtterance=\n")
 
                 idx += 1
