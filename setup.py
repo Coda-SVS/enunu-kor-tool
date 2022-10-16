@@ -8,7 +8,7 @@ required_packages = [
     "tqdm",
     "soundfile",
     "pyyaml==5.4.1",
-    "utaupy==1.18.0",
+    "utaupy @ git+https://github.com/Kor-SVS/utaupy.git",
 ]
 
 g2p4utau_required_packages = [
