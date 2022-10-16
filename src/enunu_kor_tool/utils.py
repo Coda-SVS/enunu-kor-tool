@@ -91,3 +91,7 @@ def convert_size(size_bytes):
     p = math.pow(1024, i)
     s = round(size_bytes / p, 2)
     return "%s %s" % (s, size_name[i])
+
+
+def song_bar_calculator(bpm, beat_numerator, beat_denominator):
+    return round(60 / bpm * beat_numerator * 4 / beat_denominator * 1000)

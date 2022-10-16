@@ -4,6 +4,12 @@
 
 이 저장소에서는 ENUNU 모델 제작에 도움이 되는 스크립트 및 도구가 제공됩니다.
 
+## 설치방법
+
+```
+python -m pip install git+https://github.com/Kor-SVS/enunu-kor-tool.git
+```
+
 ## 🛠️ 도구
 
 -   ### analysis4vb
@@ -18,6 +24,22 @@
 
     -   한국어 자소 -> 음소 변환 기능을 제공하는 Utau 용 g2p 모듈 (g2pk와 mecab을 사용하여 영어 및 숫자도 변환 가능)
     -   한글 자모에 대응되는 알파벳 음소 사전 및 변환 기능 (해당 사전은 국어 표준 표기법과 다를 수 있음)
+
+-   ### ustx2ust
+
+    -   ustx 포멧 파일을 ust 포멧 파일로 변환합니다. (필요 정보만 변환됨.)
+
+-   ### check4lab
+
+    -   데이터 셋을 검사합니다. (자동 폴더 감시 구조)
+
+-   ### lab2ust_fixer
+
+    -   lab 파일을 기반으로 ust/ustx 파일을 보정합니다.
+
+-   ### cut2sil
+
+    -   lab을 기반으로 wav의 무음부(sil)를 제거합니다.
 
 -   ### utaupyk
 
@@ -39,3 +61,12 @@
     > 명령줄 `lab2ntlab` 사용가능
 
     -   lab 파일의 음소만 남기고, 시간 표시를 모두 제거하는 기능
+
+-   ### ustx2lab
+
+    > 명령줄 `ustx2lab` 사용가능
+
+    -   USTX 및 UST 파일로 라벨 파일(lab)을 생성하는 기능
+    -   정확도는 낮지만, 음소가 비슷한 위치에 자동으로 배치되어 있으므로 타이밍만 정렬하면 됨
+    -   USTX, UST 파일과 타이밍이 자동으로 맞아짐
+    -   lab2ntlab 및 ustx2lab 모듈의 --no-time 옵션으로 (ust, ustx) <-> (lab) 오류 점검 가능

@@ -1,4 +1,5 @@
 import os
+import tempfile
 from glob import glob
 from typing import List
 
@@ -23,7 +24,7 @@ def lab2ust_fixer(table_filepath: str, ust_filepath: str, lab_filepath: str, out
 
     if (filepath_without_ext := os.path.splitext(ust_filepath))[1] == ".ustx":
         converter = Ustx2Ust_Converter(ust_filepath, encoding="utf-8")
-        ust_filepath = (filepath_without_ext := filepath_without_ext[0]) + ".ust"
+        ust_filepath = os.path.join(tempfile.gettempdir(), os.path.basename(filepath_without_ext[0]) + ".ust")
         converter.save_ust(ust_filepath)
 
     d_table = utaupy.table.load(table_filepath, encoding="utf-8")
@@ -143,7 +144,7 @@ def main(args=None):
         parser = argparse.ArgumentParser(description="LAB 파일로 UST 파일의 타이밍을 보정합니다.")
 
         parser.add_argument("-d", dest="table", required=True, help="table 파일 경로")
-        parser.add_argument("-p", dest="vowel_list", required=True, help="모음 리스트 (,로 구분)")
+        parser.add_argument("-p", dest="vowel_list", required=True, help="모음 리스트 (,로 구분)")  # kor: a,eo,o,u,i,eu,e,y,w
         parser.add_argument("-i", dest="input", required=True, help="DB 폴더 경로")
         parser.add_argument("-o", dest="output", required=True, help="출력 폴더 경로")
         parser.add_argument("--no-g2p", dest="notuse_g2pk4utau", action="store_false", help="g2pk4utau를 사용하지 않습니다.")
@@ -179,7 +180,8 @@ def main(args=None):
             continue
 
         input_filepath_tqdm.set_description(f"Processing... [{os.path.basename(ust_ustx_filepath)}]")
-        lab2ust_fixer(
+        try:
+            lab2ust_fixer(
             table_filepath=args["table"],
             ust_filepath=ust_ustx_filepath,
             lab_filepath=lab_files_dict[filename],
@@ -187,6 +189,8 @@ def main(args=None):
             vowel_list=vowel_list,
             use_g2pk4utau=use_g2pk4utau,
         )
+        except AssertionError:
+            print(f"AssertionError: [{os.path.split(os.path.basename(ust_ustx_filepath))[0]}]")
 
     print("done.")
 
