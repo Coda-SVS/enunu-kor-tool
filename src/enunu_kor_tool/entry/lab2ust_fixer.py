@@ -182,15 +182,15 @@ def main(args=None):
         input_filepath_tqdm.set_description(f"Processing... [{os.path.basename(ust_ustx_filepath)}]")
         try:
             lab2ust_fixer(
-            table_filepath=args["table"],
-            ust_filepath=ust_ustx_filepath,
-            lab_filepath=lab_files_dict[filename],
-            output_dirpath=args["output"],
-            vowel_list=vowel_list,
-            use_g2pk4utau=use_g2pk4utau,
-        )
-        except AssertionError:
-            print(f"AssertionError: [{os.path.split(os.path.basename(ust_ustx_filepath))[0]}]")
+                table_filepath=args["table"],
+                ust_filepath=ust_ustx_filepath,
+                lab_filepath=lab_files_dict[filename],
+                output_dirpath=args["output"],
+                vowel_list=vowel_list,
+                use_g2pk4utau=use_g2pk4utau,
+            )
+        except AssertionError as ex:
+            print(f"AssertionError: [{os.path.split(os.path.basename(ust_ustx_filepath))[0]}] {ex=}")
 
     print("done.")
 
