@@ -71,13 +71,18 @@ def cut2sil(wav_filepath: str, lab_filepath: str, output_dirpath: str, sil_notat
 
     os.makedirs(output_dirpath, exist_ok=True)
 
-    sf.write(os.path.join(output_dirpath, os.path.basename(wav_filepath)), y, sr)
+    output_wav_filepath = os.path.join(output_dirpath, os.path.basename(wav_filepath))
+    output_lab_filepath = os.path.join(output_dirpath, os.path.basename(lab_filepath))
 
-    with open(os.path.join(output_dirpath, os.path.basename(lab_filepath)), "w", encoding="utf-8") as f:
+    sf.write(output_wav_filepath, y, sr)
+
+    with open(output_lab_filepath, "w", encoding="utf-8") as f:
         temp_lines = []
         for line in result_lab:
             temp_lines.append(" ".join(line))
         f.write("\n".join(temp_lines))
+
+    return output_wav_filepath, output_lab_filepath
 
 
 def cli_ui_main():

@@ -117,7 +117,12 @@ def lab2ust_fixer(table_filepath: str, ust_filepath: str, lab_filepath: str, out
 
     os.makedirs(output_dirpath, exist_ok=True)
 
-    ust.write(os.path.join(output_dirpath, os.path.splitext(os.path.basename(ust_filepath))[0] + ".ust"), encoding="utf-8")
+    output_filepath = os.path.join(output_dirpath, os.path.splitext(os.path.basename(ust_filepath))[0] + ".ust")
+
+
+    ust.write(output_filepath, encoding="utf-8")
+
+    return output_filepath
 
 
 def cli_ui_main():
