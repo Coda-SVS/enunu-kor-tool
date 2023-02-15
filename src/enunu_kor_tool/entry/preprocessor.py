@@ -14,9 +14,7 @@ TABLE_PATH = ""
 VOWEL_LIST = []
 USE_G2PK4UTAU = True
 
-UST_TEMP_PATH = ""
-LAB_TEMP_PATH = ""
-WAV_TEMP_PATH = ""
+TEMP_PATH = ""
 
 
 class DataFile:
@@ -29,7 +27,12 @@ class DataFile:
     def is_available(self):
         return len(self._name) != 0 and len(self._ust_path) != 0 and len(self._lab_path) != 0 and len(self._wav_path) != 0
 
-    def add_path(self, filepath: str):
+    def set_path(self, filepath: str):
+        filepath = os.path.realpath(filepath)
+
+        if not os.path.exists(filepath):
+            return False
+
         name, ext = os.path.splitext(os.path.basename(filepath))
 
         if len(self._name) == 0:
@@ -54,15 +57,6 @@ class DataFile:
     def ust_path(self):
         return self._ust_path
 
-    @ust_path.setter
-    def ust_path(self, value):
-        name, ext = os.path.splitext(os.path.basename(value))
-
-        if len(self._name) == 0:
-            self._name = name
-
-        self._ust_path = value
-
     @property
     def lab_path(self):
         return self._lab_path
@@ -83,6 +77,11 @@ class DataFile:
 
     def __str__(self) -> str:
         return self.__repr__()
+
+    def release(self, output_path: str):
+        shutil.copy2(self.ust_path, os.path.join(output_path, os.path.basename(self.ust_path)))
+        shutil.copy2(self.lab_path, os.path.join(output_path, os.path.basename(self.lab_path)))
+        shutil.copy2(self.wav_path, os.path.join(output_path, os.path.basename(self.wav_path)))
 
 
 def cli_ui_main():
@@ -129,10 +128,39 @@ def get_db_files(input_path: str):
 
 def preprocess(db_files: List[DataFile], output_path: str):  # 전처리
     global TABLE_PATH, VOWEL_LIST, USE_G2PK4UTAU
-    global UST_TEMP_PATH, LAB_TEMP_PATH, WAV_TEMP_PATH
+    global TEMP_PATH
 
-    for datafile in tqdm(db_files, desc="Processing..."):
-        lab2ust_fixer(TABLE_PATH, datafile.ust_path, datafile.lab_path, , VOWEL_LIST, USE_G2PK4UTAU)
+    cut2sil_temppath = os.path.join(TEMP_PATH, "cut2sil")
+    lab2ust_fixer_temppath = os.path.join(TEMP_PATH, "lab2ust_fixer")
+    norm4wav_temppath = os.path.join(TEMP_PATH, "norm4wav")
+
+    os.makedirs(cut2sil_temppath, exist_ok=True)
+    os.makedirs(lab2ust_fixer_temppath, exist_ok=True)
+    os.makedirs(norm4wav_temppath, exist_ok=True)
+
+    for datafile in tqdm(db_files, desc="Processing...", leave=False):
+        tqdm.write(f"File Name: {datafile.name}")
+
+        # * 무음부 컷팅
+        tqdm.write(f"[cut2sil] Processing...")
+        output_wav_filepath, output_lab_filepath = cut2sil(datafile.wav_path, datafile.lab_path, cut2sil_temppath, "sil")
+        datafile.set_path(output_wav_filepath)
+        datafile.set_path(output_lab_filepath)
+
+        # * lab 기반 ust 보정
+        # TODO: ust 양자화 로직 작성
+        tqdm.write(f"[lab2ust_fixer] Processing...")
+        output_filepath = lab2ust_fixer(TABLE_PATH, datafile.ust_path, datafile.lab_path, lab2ust_fixer_temppath, VOWEL_LIST, USE_G2PK4UTAU)
+        datafile.set_path(output_filepath)
+
+        # * wav 노멀라이징
+        tqdm.write(f"[norm4wav] Processing...")
+        output_filepath = os.path.join(norm4wav_temppath, os.path.basename(datafile.wav_path))
+        audio_norm(datafile.wav_path, output_filepath)
+        datafile.set_path(output_filepath)
+
+        tqdm.write(f"Release...")
+        datafile.release(output_path)
 
 
 def main(args=None):
@@ -172,25 +200,18 @@ def main(args=None):
 
     # main logic
 
-    temp_path = os.path.join(output_path, "__temp")
+    global TEMP_PATH
+
+    TEMP_PATH = os.path.join(output_path, "__temp")
 
     os.makedirs(output_path, exist_ok=True)
-    os.makedirs(temp_path, exist_ok=True)
-
-    global UST_TEMP_PATH, LAB_TEMP_PATH, WAV_TEMP_PATH
-
-    UST_TEMP_PATH = os.path.join(temp_path, "ust")
-    LAB_TEMP_PATH = os.path.join(temp_path, "lab")
-    WAV_TEMP_PATH = os.path.join(temp_path, "wav")
-    os.makedirs(UST_TEMP_PATH, exist_ok=True)
-    os.makedirs(LAB_TEMP_PATH, exist_ok=True)
-    os.makedirs(WAV_TEMP_PATH, exist_ok=True)
+    os.makedirs(TEMP_PATH, exist_ok=True)
 
     # ustx -> ust
-    ustx2ust(input_path, os.path.join(UST_TEMP_PATH, "ustx2ust"))
+    ustx2ust(input_path, os.path.join(TEMP_PATH, "ustx2ust"))
 
-    ust_files.extend(glob(os.path.join(UST_TEMP_PATH, "*.ust"), recursive=True))
-    ust_files.extend(glob(os.path.join(UST_TEMP_PATH, "**", "*.ust"), recursive=True))
+    ust_files.extend(glob(os.path.join(TEMP_PATH, "*.ust"), recursive=True))
+    ust_files.extend(glob(os.path.join(TEMP_PATH, "**", "*.ust"), recursive=True))
     ust_files = list(set(ust_files))
     ust_files.sort()
 
@@ -202,13 +223,13 @@ def main(args=None):
         for datafile in db_files:
             if datafile.is_available():
                 continue
-            elif datafile.add_path(filepath):
+            elif datafile.set_path(filepath):
                 is_added = True
                 break
 
         if not is_added:
             datafile = DataFile()
-            datafile.add_path(filepath)
+            datafile.set_path(filepath)
             db_files.append(datafile)
 
     for ust_file in ust_files:
@@ -220,16 +241,20 @@ def main(args=None):
     for wav_file in wav_files:
         add_db(wav_file)
 
-    for idx in range(len(db_files) - 1, 0, -1):
-        if db_files[idx].is_available():
-            continue
+    old_db_files = db_files
+    db_files = []
+
+    for db_file in old_db_files:
+        if db_file.is_available():
+            db_files.append(db_file)
         else:
-            print(f"삭제됨: {db_files[idx]}")
-            del db_files[idx]
+            print(f"삭제됨: {db_file}")
 
     print(f"Info: 데이터 파일 개수: [{len(db_files)}]")
 
     preprocess(db_files, output_path)
+
+    shutil.rmtree(TEMP_PATH, ignore_errors=True)
 
     print("done.")
 
