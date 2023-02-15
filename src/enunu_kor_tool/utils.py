@@ -125,3 +125,16 @@ def get_files(path: str, ext_filters: List[str], is_sort: bool = -True) -> List[
         filepaths.sort()
 
     return filepaths
+
+
+def roundTraditional(value: float, digits: float):
+    """반올림 처리 함수
+
+    Args:
+        val (float): 값
+        digits (float): 자릿수
+
+    Returns:
+        float: 반올림이 적용된 값
+    """
+    return round(value + 10 ** (-len(str(value)) - 1), digits)
