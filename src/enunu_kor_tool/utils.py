@@ -1,7 +1,8 @@
 import os
 import json
 import yaml
-from typing import Any
+import glob
+from typing import Any, List
 
 
 def is_not_null_str(s: str):
@@ -95,3 +96,32 @@ def convert_size(size_bytes):
 
 def song_bar_calculator(bpm, beat_numerator, beat_denominator):
     return round(60 / bpm * beat_numerator * 4 / beat_denominator * 1000)
+
+
+def get_files(path: str, ext_filters: List[str], is_sort: bool = -True) -> List[str]:
+    """해당 폴더 내부의 확장자에 알맞는 모든 파일을 가져옵니다.
+
+    Args:
+        path (str): 폴더 위치
+        ext_filters (List[str]): 확장자 필터
+        is_sort (bool): 정렬 사용
+
+    Returns:
+        List[str]: 오디오 파일의 경로
+    """
+
+    ext_filters = list(set(ext_filters))
+    filepaths = []
+
+    for ext in ext_filters:
+        ext = ext.strip()
+
+        filepaths += glob.glob(os.path.join(path, "**", f"*.{ext}"), recursive=True)
+        filepaths += glob.glob(os.path.join(path, f"*.{ext}"), recursive=True)
+
+    filepaths = list(set(filepaths))
+
+    if is_sort:
+        filepaths.sort()
+
+    return filepaths
