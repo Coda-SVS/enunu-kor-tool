@@ -6,7 +6,7 @@ from typing import List
 import utaupy
 from tqdm import tqdm
 
-from enunu_kor_tool import g2pk4utau, log
+from enunu_kor_tool import g2pk4utau, log, utils
 from enunu_kor_tool.entry.ustx2lab import ust_notes2phn
 from enunu_kor_tool.utaupyk._ustx2ust import Ustx2Ust_Converter
 
@@ -15,7 +15,7 @@ length2ms_converter = lambda length: length / 10000
 PAU_LIST = ["pau", "sil"]
 
 
-def lab2ust_fixer(table_filepath: str, ust_filepath: str, lab_filepath: str, output_dirpath: str, vowel_list: List[str], use_g2pk4utau: bool = False):
+def lab2ust_fixer(table_filepath: str, ust_filepath: str, lab_filepath: str, output_dirpath: str, vowel_list: List[str], use_g2pk4utau: bool = False, note_quantize: bool = True):
     global PAU_LIST
 
     logger = log.get_logger(lab2ust_fixer)
@@ -119,6 +119,26 @@ def lab2ust_fixer(table_filepath: str, ust_filepath: str, lab_filepath: str, out
 
     output_filepath = os.path.join(output_dirpath, os.path.splitext(os.path.basename(ust_filepath))[0] + ".ust")
 
+    if note_quantize:
+        offset = 15
+        pos = 0
+        end = 0
+        new_pos = 0
+        new_end = 0
+
+        for idx, note in enumerate(ust.notes):
+            before_note_length = note.length
+
+            end = pos + note.length
+
+            new_pos = int(utils.roundTraditional(pos / offset, 0) * offset)
+            new_end = int(utils.roundTraditional(end / offset, 0) * offset)
+
+            note.length = new_end - new_pos
+
+            pos += note.length
+
+            logger.info(f"* [{str(idx).rjust(4)}] [{note.lyric}] : [{before_note_length}] -> [{note.length}]")
 
     ust.write(output_filepath, encoding="utf-8")
 
