@@ -119,15 +119,16 @@ class Ustx2Ust_Converter:
 
 
 def ustx2ust(db_root, out_dir, flag=""):
-    target_files = glob(f"{db_root}/**/*.ustx", recursive=True)
+    target_files = glob(os.path.join(db_root, "*.ustx"), recursive=True)
+    target_files.extend(glob(os.path.join(db_root, "**", "*.ustx"), recursive=True))
+
     if len(target_files) != 0:
         os.makedirs(out_dir, exist_ok=True)
-        print(f"Converting ustx files")
-        for path in tqdm(target_files):
-            if os.path.basename(path).endswith("-autosave"):
+        for path in tqdm(target_files, desc="Converting ustx files"):
+            name, ext = os.path.splitext(os.path.basename(path))
+            if name.lower().endswith("-autosave"):
                 continue
             converter = Ustx2Ust_Converter(path)
-            name, ext = os.path.splitext(os.path.basename(path))
             converter.save_ust(os.path.join(out_dir, f"{name}.ust"), flag)
 
 
