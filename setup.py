@@ -8,6 +8,7 @@ required_packages = [
     "tqdm",
     "soundfile",
     "pyyaml==5.4.1",
+    "pydub==0.25.1",
     "utaupy @ git+https://github.com/Kor-SVS/utaupy.git",
 ]
 
@@ -83,6 +84,7 @@ setuptools.setup(
             "lab2ust_fixer=enunu_kor_tool.entry.lab2ust_fixer:main",
             "cut2sil=enunu_kor_tool.entry.cut2sil:main",
             "exe_entry=enunu_kor_tool.entry.exe_entry:main",
+            "preprocessor=enunu_kor_tool.entry.preprocessor:main",
             # "ust2lab4model=enunu_kor_tool.entry.ust2lab4model:main",
         ]
     },
