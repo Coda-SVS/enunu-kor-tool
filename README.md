@@ -61,12 +61,3 @@ python -m pip install git+https://github.com/Kor-SVS/enunu-kor-tool.git
     > 명령줄 `lab2ntlab` 사용가능
 
     -   lab 파일의 음소만 남기고, 시간 표시를 모두 제거하는 기능
-
--   ### ustx2lab
-
-    > 명령줄 `ustx2lab` 사용가능
-
-    -   USTX 및 UST 파일로 라벨 파일(lab)을 생성하는 기능
-    -   정확도는 낮지만, 음소가 비슷한 위치에 자동으로 배치되어 있으므로 타이밍만 정렬하면 됨
-    -   USTX, UST 파일과 타이밍이 자동으로 맞아짐
-    -   lab2ntlab 및 ustx2lab 모듈의 --no-time 옵션으로 (ust, ustx) <-> (lab) 오류 점검 가능
